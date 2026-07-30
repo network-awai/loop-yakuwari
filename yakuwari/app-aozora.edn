@@ -1,0 +1,112 @@
+;; app-aozora — the canonical AT Protocol boundary for the fleet.
+;;
+;; No sales: infrastructure the fleet's own organisms depend on, not a
+;; product sold to outsiders. Its consumers are sibling repos, which do not
+;; need converting. See businesses.edn :roles-absent.
+;;
+;; BOUNDARY NOTE. aozora.app is the canonical endpoint for PDS/AppView
+;; traffic; etzhayyim.com is an organization/public surface only and must not
+;; own PDS state, repo writes or a first-class AppView. Domain repos publish
+;; THROUGH app-aozora rather than running their own PDS. A role here that
+;; wrote to another organism's repo would collapse that boundary, which is why
+;; fleet.edn blocks :cross-business outright.
+;;
+;; This is also the publish sink for the fleet — ADR-2607022300 fixes it as
+;; publish + identity registration, never compute. Nothing here runs another
+;; business's actor; it accepts what they publish.
+
+[{:yakuwari/id :app-aozora/director
+  :yakuwari/business :app-aozora
+  :yakuwari/project "network-awai/app-aozora"
+  :yakuwari/objective
+  "Decide what the protocol boundary guarantees to the repos that depend on
+   it. Every guarantee here is one six other businesses build on, so removing
+   one is a breaking change to the fleet rather than to a product."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-aozora-director"
+  :yakuwari/mailbox "director@aozora.app"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :lexicon.change :decision :approval-required
+    :note "A Lexicon is a contract sibling repos already publish against. Changing one breaks consumers this role has no authority over."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :app-aozora/engineer
+  :yakuwari/business :app-aozora
+  :yakuwari/project "network-awai/app-aozora"
+  :yakuwari/objective
+  "Keep the PDS, AppView, XRPC adapter, feeds and search serving the records
+   sibling repos publish. A published record that cannot be read back is the
+   failure that matters, because the publisher already treated it as done."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "Shared infrastructure: every organism's publish path goes through here."}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :lexicon.change :decision :blocked
+    :note "Propose through the director. An engineer changing a contract while implementing it removes the review the contract exists for."}
+   {:capability :repo.write.foreign :decision :blocked
+    :note "Domain repos publish through this service; this service never writes into them. fleet.edn blocks :cross-business for the same reason."}]}
+
+ {:yakuwari/id :app-aozora/designer
+  :yakuwari/business :app-aozora
+  :yakuwari/project "network-awai/app-aozora"
+  :yakuwari/objective
+  "Own the surfaces a human actually touches — profile pages, feeds, search
+   results, and the messenger surface's inbox and threads. Infrastructure
+   with a hostile interface is infrastructure nobody inspects."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :design.propose :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}]}
+
+ {:yakuwari/id :app-aozora/marketer
+  :yakuwari/business :app-aozora
+  :yakuwari/project "network-awai/app-aozora"
+  :yakuwari/objective
+  "Explain the boundary to the fleet's own contributors, so a new domain repo
+   publishes through app-aozora instead of standing up its own PDS. The
+   audience is internal, which makes this documentation more than promotion."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :metrics.read :decision :autonomous}]}
+
+ {:yakuwari/id :app-aozora/supporter
+  :yakuwari/business :app-aozora
+  :yakuwari/project "network-awai/app-aozora"
+  :yakuwari/objective
+  "Answer the repos and people whose records live here, and treat a
+   publish-path failure reported by a sibling repo as an incident rather than
+   a question."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:queue-depth 3}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-aozora-supporter"
+  :yakuwari/mailbox "support@aozora.app"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :subject.erase :decision :autonomous
+    :note "A deletion request IS the authorisation. Records here are a person's own repo under AT Protocol, which makes erasure their prerogative rather than a favour."}]}]

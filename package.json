@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "nbb --classpath src:test:../../kotoba-lang/yakuwari/src -e \"(require '[clojure.test :as t] 'awai.core-test) (let [r (t/run-tests 'awai.core-test)] (.exit js/process (if (pos? (+ (:fail r) (:error r))) 1 0)))\"",
+    "check": "nbb bin/awai.cljs check"
+  }
+}

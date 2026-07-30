@@ -1,0 +1,126 @@
+;; nexus-x402 — self-hosted x402 payment facilitator and gateway.
+;;
+;; No designer: the directory page and llms.txt renderer come from
+;; kotoba-lang/x402-directory; this repo adds a thin branding layer only.
+;; See businesses.edn :roles-absent.
+;;
+;; KEYLESS NOTE, load-bearing. The facilitator holds no keys. Sellers register
+;; pricing rules, nexus verifies payments on-chain at the edge, and each
+;; seller settles to its OWN treasury. Nothing in this file may acquire a
+;; signing key or a settlement path — "the facilitator holds no keys" is the
+;; product's security claim, and a role that could hold one would falsify it.
+;;
+;; This is also where the fleet's own safety floor is least abstract: no role
+;; here may buy, sell, transfer, convert or trade funds, whatever its business
+;; reason. Verification is reading a chain; settlement is someone else's key.
+
+[{:yakuwari/id :nexus-x402/director
+  :yakuwari/business :nexus-x402
+  :yakuwari/project "network-awai/nexus-x402"
+  :yakuwari/objective
+  "Decide which sellers the gateway serves next and what the facilitator
+   promises them. Three sellers are live; the job is choosing the fourth and
+   what breaks when it arrives, not maximising the count."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-x402-director"
+  :yakuwari/mailbox "director@x402.nexus"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :seller.register :decision :approval-required
+    :note "Registering a seller sets pricing rules that will charge that seller's customers real money."}
+   {:capability :funds.move :decision :blocked
+    :note "Never, for any role, for any reason. The facilitator holds no keys — that is the product's security claim, not a limitation to work around."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :nexus-x402/engineer
+  :yakuwari/business :nexus-x402
+  :yakuwari/project "network-awai/nexus-x402"
+  :yakuwari/objective
+  "Keep on-chain verification correct and keyless. The gateway brain is
+   kotoba-lang/pay; this repo adds the HTTP envelope and on-chain I/O, so a
+   verification bug here charges or fails to charge real payments."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "One edge Worker is the facilitator for every seller. A bad deploy stops three businesses collecting payment."}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :funds.move :decision :blocked}
+   {:capability :key.custody :decision :blocked
+    :note "Introducing key custody would change what this product IS. Not an implementation choice available to an engineer."}]}
+
+ {:yakuwari/id :nexus-x402/sales
+  :yakuwari/business :nexus-x402
+  :yakuwari/project "network-awai/nexus-x402"
+  :yakuwari/objective
+  "Onboard sellers one at a time by name. Sales here is seller onboarding,
+   not end-user acquisition — the gateway's customers are the businesses
+   charging through it."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-x402-sales"
+  :yakuwari/mailbox "sellers@x402.nexus"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :seller.register :decision :approval-required
+    :note "A seller's pricing rules charge that seller's customers. Sales may prepare the registration; a human commits it."}
+   {:capability :pricing.change :decision :blocked}
+   {:capability :funds.move :decision :blocked}]}
+
+ {:yakuwari/id :nexus-x402/marketer
+  :yakuwari/business :nexus-x402
+  :yakuwari/project "network-awai/nexus-x402"
+  :yakuwari/objective
+  "Make the case to developers that an open, live, keyless facilitator beats
+   a closed waitlist. The comparison is the pitch, so every claim about
+   either side must be checkable — a wrong claim about a competitor is worse
+   than no claim."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :spend.commit :decision :approval-required}
+   {:capability :funds.move :decision :blocked}]}
+
+ {:yakuwari/id :nexus-x402/supporter
+  :yakuwari/business :nexus-x402
+  :yakuwari/project "network-awai/nexus-x402"
+  :yakuwari/objective
+  "Answer sellers, and treat a payment that verified wrongly in either
+   direction as an incident. A seller who was not paid and a customer who was
+   charged twice are the same class of failure from opposite sides."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-x402-supporter"
+  :yakuwari/mailbox "support@x402.nexus"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous}
+   {:capability :refund.issue :decision :approval-required
+    :note "A refund is a movement of money even when it is the right thing to do. Prepare it; a human commits it."}
+   {:capability :funds.move :decision :blocked}]}]

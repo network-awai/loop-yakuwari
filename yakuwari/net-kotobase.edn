@@ -1,0 +1,123 @@
+;; net-kotobase — content-addressed knowledge-graph BaaS, pinning and hosting.
+;;
+;; No designer: the product surface is an API, runbooks and plan documents.
+;; See businesses.edn :roles-absent.
+;;
+;; SLA NOTE. Three plans separated by who carries operational
+;; responsibility — P2P (operator carries none), Secure Managed (99.9%
+;; monthly with service credits), Enterprise (99.999%, by contract). The
+;; middle and upper plans mean supporter's incident duty is a contractual
+;; obligation with money attached, not a courtesy. That is why
+;; :incident.respond is the one capability in this file allowed to act
+;; without waiting for a human.
+
+[{:yakuwari/id :net-kotobase/director
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Decide what the service commits to next, and keep the three plans'
+   promises consistent with what the runbook can actually deliver. A plan
+   document promising more than the runbook supports is the failure this role
+   exists to prevent."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-kotobase-director"
+  :yakuwari/mailbox "director@kotobase.net"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :pricing.change :decision :approval-required}
+   {:capability :sla.commit :decision :approval-required
+    :note "An SLA is a contractual promise with service credits attached. Only the principal can bind the company to one."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :net-kotobase/engineer
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Keep pins durable and queries correct. A pin is a named commit CID that
+   was promised to stay retrievable, so losing one is a broken promise rather
+   than a bug."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "This repo is the sole owner of externally reachable Kotobase Cloudflare deployments, and other services depend on kotobase.net being up. Deploy is never autonomous here."}
+   {:capability :incident.respond :decision :autonomous
+    :note "Restoring a service under an SLA clock. Waiting for an approval to START diagnosing is the failure mode; the fix itself still needs a merge."}
+   {:capability :data.delete :decision :blocked
+    :note "Deleting a customer's pinned data is exactly the irreversible action on someone else's property that nothing here may do."}]}
+
+ {:yakuwari/id :net-kotobase/sales
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Convert a named engineering organisation onto Secure Managed or
+   Enterprise. Bounded to named organisations: the P2P plan needs no selling
+   and self-serve needs no salesperson."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-kotobase-sales"
+  :yakuwari/mailbox "sales@kotobase.net"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :pricing.change :decision :blocked}
+   {:capability :sla.commit :decision :blocked
+    :note "The 99.999% tier is 'by contract' precisely because a human signs it. A sales role that could commit an SLA could commit the company to an obligation nobody staffed."}]}
+
+ {:yakuwari/id :net-kotobase/marketer
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Make the service legible to engineers evaluating a graph database. Every
+   published benchmark or availability figure must be one the runbook and the
+   service-level document already support — inventing a number here creates a
+   promise sales will be held to."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :sla.commit :decision :blocked
+    :note "Publishing an availability claim is committing to it in practice, whatever the contract says."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :net-kotobase/supporter
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Answer operators and triage incidents against the alpha operational
+   objectives and incident thresholds the service-level document defines.
+   Under Secure Managed the answer has service credits attached to its
+   timeliness."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-kotobase-supporter"
+  :yakuwari/mailbox "support@kotobase.net"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous
+    :note "Triage and acknowledgement under an SLA clock. Escalation to a fix still goes through engineer."}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous}
+   {:capability :data.delete :decision :blocked}]}]

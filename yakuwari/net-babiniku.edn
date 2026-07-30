@@ -1,0 +1,106 @@
+;; net-babiniku — chat with an AI character whose body is a live VRM avatar.
+;;
+;; CONTAINMENT NOTE, load-bearing. The product already has a governor: an
+;; LLM-persona node PROPOSES {:dialogue :emotion :motion-cue} and
+;; babiniku.governor/review-turn is the only path by which a proposal becomes
+;; a renderable or speakable turn, with every review appended to an audit
+;; ledger. None of the roles here may weaken, bypass or replace that. A role
+;; proposes work on the repo; the governor decides what the character says.
+;; Those are different layers and conflating them would remove the only thing
+;; standing between an LLM and a published utterance.
+
+[{:yakuwari/id :net-babiniku/director
+  :yakuwari/business :net-babiniku
+  :yakuwari/project "network-awai/net-babiniku"
+  :yakuwari/objective
+  "Decide what the character can do next. Every capability added to a
+   character is a capability added to a persona users form attachments to, so
+   the job includes deciding what it will NOT do."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-babiniku-director"
+  :yakuwari/mailbox "director@babiniku.net"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :spend.commit :decision :approval-required}
+   {:capability :governor.policy.change :decision :approval-required
+    :note "The governor is the containment boundary. Its policy may be proposed here but never changed autonomously — that is the one change that could make every other decision moot."}]}
+
+ {:yakuwari/id :net-babiniku/engineer
+  :yakuwari/business :net-babiniku
+  :yakuwari/project "network-awai/net-babiniku"
+  :yakuwari/objective
+  "Keep the VRM avatar rendering and the turn pipeline honest — a turn is
+   data, and the render state is a pure projection of it. Wiring
+   expression/motion cues to the live avatar is the standing gap."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}
+   {:capability :governor.policy.change :decision :blocked
+    :note "An engineer that can edit the containment policy while fixing the pipeline it contains has no containment policy. Propose it through the director."}]}
+
+ {:yakuwari/id :net-babiniku/designer
+  :yakuwari/business :net-babiniku
+  :yakuwari/project "network-awai/net-babiniku"
+  :yakuwari/objective
+  "Own how the character reads — expression, motion, pacing. A VTuber
+   presentation whose face does not match its words is worse than a static
+   portrait, which is the thing this product exists to replace."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :design.propose :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}]}
+
+ {:yakuwari/id :net-babiniku/marketer
+  :yakuwari/business :net-babiniku
+  :yakuwari/project "network-awai/net-babiniku"
+  :yakuwari/objective
+  "Make it findable, and never imply the character is a person. That
+   constraint is not marketing guidance — it is the same boundary
+   person-awai-ryo's README draws, and this product is the one where breaking
+   it would be most profitable and least honest."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :approval-required
+    :note "Stricter than the fleet ceiling's :voice-required, on purpose. Copy about a synthetic persona is exactly where an unreviewed claim does real harm."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :net-babiniku/supporter
+  :yakuwari/business :net-babiniku
+  :yakuwari/project "network-awai/net-babiniku"
+  :yakuwari/objective
+  "Answer users, and escalate anything that suggests a user believes the
+   character is human. That escalation is not a support nicety; it is the
+   signal the containment boundary is failing in practice even when the
+   governor's ledger looks clean."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 3}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-babiniku-supporter"
+  :yakuwari/mailbox "support@babiniku.net"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous
+    :note "A deletion request IS the authorisation. Conversation logs with a persona are among the most personal data this fleet holds."}]}]

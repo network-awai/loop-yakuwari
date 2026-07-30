@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Installed by deploy/install.cljs, which substitutes @REPO@ and @NBB@.
+     Same install-time template convention as cloud-murakumo's
+     deploy/organism/. Do not install this file directly. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>network.awai.yakuwari.publish</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@NBB@</string>
+    <string>--classpath</string>
+    <string>@REPO@/src:@REPO@/../../kotoba-lang/yakuwari/src:@REPO@/../../kotoba-lang/yakuwari-view/src</string>
+    <string>@REPO@/bin/awai.cljs</string>
+    <string>project</string>
+    
+  </array>
+  <!-- A LaunchAgent starts with cwd "/", so AWAI_ROOT is set explicitly
+       rather than relying on find-root walking up from cwd. -->
+  <key>WorkingDirectory</key><string>@REPO@</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>AWAI_ROOT</key><string>@REPO@</string></dict>
+  <key>StartInterval</key><integer>900</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>@HOME@/.gftd/awai-yakuwari-publish.log</string>
+  <key>StandardErrorPath</key><string>@HOME@/.gftd/awai-yakuwari-publish.log</string>
+</dict>
+</plist>

@@ -1,0 +1,5 @@
+node_modules/
+.nbb/
+.cpcache/
+# Live run state, written by a dispatcher rather than authored.
+journal/runs.edn

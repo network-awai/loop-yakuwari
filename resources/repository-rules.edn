@@ -1,0 +1,16 @@
+;; This repository's own entry in the workspace taxonomy whose authority is
+;; com-junkawasaki/root manifest/repository-rules.edn (ADR-2607299000).
+;; Repeated here — not merely inherited by convention — so a reader of THIS
+;; repo alone can verify which contract it claims to satisfy.
+{:schema "kotoba.repository-role-rules.v0"
+ :this-repo
+ {:prefix "loop-"
+  :role :continuous-orchestrator
+  :must [:observe :evaluate :decide :act :record-evidence]
+  :must-not [:own-domain-scoring-truth :bind-to-one-ci-provider]
+  ;; Domain truth stays upstream: whether a role is well-formed, what a
+  ;; capability decision means, and how many runs a role should have are all
+  ;; kotoba-lang/yakuwari's. This repo decides only which role goes next.
+  :authority-library "kotoba-lang/yakuwari"
+  :composition {:authority "loop-yakuwari"
+                :libraries ["yakuwari" "yakuwari-view"]}}}

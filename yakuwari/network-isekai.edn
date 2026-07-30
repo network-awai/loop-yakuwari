@@ -1,0 +1,116 @@
+;; network-isekai — play and fork CLJ/EDN games in the browser.
+;;
+;; One file per business rather than per role: "does this business have the
+;; right roles?" is the question a reviewer actually asks, and it cannot be
+;; answered from one role's file. tamaki keeps one file per role, but it has
+;; eight roles in one flat namespace and no business boundary to review at.
+;;
+;; Every map here is a plain authored yakuwari spec — NO :db/id. The
+;; superproject query-plane loader adds :db/id and :source/dataset, the same
+;; way it does for fleet-db and market-intel; only 90-docs/adr/*.edn is
+;; pre-wrapped tx-data.
+;;
+;; Capability decisions use yakuwari.policy's vocabulary
+;; (:autonomous / :voice-required / :approval-required / :blocked). An
+;; unlisted capability is :blocked — permission must not arrive by omission.
+;; fleet.edn's :capability-ceiling can only narrow what is written here.
+
+[{:yakuwari/id :network-isekai/director
+  :yakuwari/business :network-isekai
+  :yakuwari/project "network-awai/network-isekai"
+  :yakuwari/objective
+  "Decide what network-isekai does next and keep that decision legible in the
+   repo. Narrow on purpose: the platform's growth is people forking games, so
+   the director's job is choosing which friction to remove next, not running
+   a funnel."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-isekai-director"
+  :yakuwari/mailbox "director@isekai.network"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous
+    :note "Fork counts, clear events, published-fork graph. Reads the economy's own ledger at /api/events."}
+   {:capability :roadmap.set :decision :autonomous
+    :note "Writing down what comes next is the job. It commits nothing but the repo's own docs."}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous
+    :note "Receive and file mail at director@isekai.network."}
+   {:capability :mail.send :decision :approval-required
+    :note "Outbound mail is external correspondence. Always a human."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :network-isekai/engineer
+  :yakuwari/business :network-isekai
+  :yakuwari/project "network-awai/network-isekai"
+  :yakuwari/objective
+  "Keep the fork path working end to end — scene/logic blobs, tree, commit,
+   CID-verified rehydration in another browser — and remove the failures that
+   stop a game being playable."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous
+    :note "Opening a PR proposes; it changes nothing that ships."}
+   {:capability :patch.integrate :decision :approval-required
+    :note "Merging is where a proposal becomes everyone's problem."}
+   {:capability :deploy.production :decision :approval-required
+    :note "Cloudflare Pages is live at isekai.network. Deploy has no fast-forward check — last writer wins — so this is never autonomous."}]}
+
+ {:yakuwari/id :network-isekai/designer
+  :yakuwari/business :network-isekai
+  :yakuwari/project "network-awai/network-isekai"
+  :yakuwari/objective
+  "Make a game's source readable and its fork button obvious. The product's
+   claim is 'view source and fork on every game', so presentation failures
+   here are product failures, not polish."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :design.propose :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}]}
+
+ {:yakuwari/id :network-isekai/marketer
+  :yakuwari/business :network-isekai
+  :yakuwari/project "network-awai/network-isekai"
+  :yakuwari/objective
+  "Make it findable by people who would fork a game if they knew this
+   existed. Every claim must point at a game anyone can open — the repo and
+   every game's EDN are public, so there is no excuse for an unverifiable
+   one."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :voice-required
+    :note "Published words cannot be recalled once seen. Executes, but owes a notification first."}
+   {:capability :spend.commit :decision :approval-required
+    :note "Paid acquisition commits real money."}]}
+
+ {:yakuwari/id :network-isekai/supporter
+  :yakuwari/business :network-isekai
+  :yakuwari/project "network-awai/network-isekai"
+  :yakuwari/objective
+  "Answer the people already making games here, and turn each recurring
+   question into either a fix or a document so it stops recurring."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:queue-depth 3}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-isekai-supporter"
+  :yakuwari/mailbox "support@isekai.network"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous
+    :note "Filing what a creator reported is the point of reading the mail."}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous
+    :note "A deletion request IS the authorisation. Never make a data subject wait in an approval queue."}]}]

@@ -1,0 +1,124 @@
+;; club-shinshi — membership club, operated by JK Inc. (BVI).
+;;
+;; The only business carrying all six roles: membership is sold to named
+;; people, so sales is a real function rather than a funnel.
+;;
+;; NOTE on scope. This repo's root holds shared contracts, legal and
+;; operations; the app and its two existing actor modules
+;; (club-shinshi-actor-shinshi, club-shinshi-actor-magatama) are siblings.
+;; Those actors are in-app behaviour, NOT roles — a role here proposes work
+;; on the repos, it does not replace the governor inside the product.
+
+[{:yakuwari/id :club-shinshi/director
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Decide what the club offers members next, and keep the shared contract,
+   legal and operational documents in the root repo saying the same thing the
+   app does. Divergence between those two IS the failure mode here."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-shinshi-director"
+  :yakuwari/mailbox "director@shinshi.club"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :pricing.change :decision :approval-required
+    :note "Membership price is a term of a live agreement with existing members. Never autonomous."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :club-shinshi/engineer
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Change the app and the shared Lexicon contracts without breaking the
+   sibling repos that consume them. A contract change that compiles here and
+   breaks a consumer is not done."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required
+    :note "Shared contracts live here, so a merge can break repos this role has no authority over."}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :club-shinshi/designer
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Own how membership feels — joining, belonging, and the moments the club
+   asks something of a member. A club whose interface reads as a form is not
+   the product."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :design.propose :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}]}
+
+ {:yakuwari/id :club-shinshi/sales
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Convert a named prospect into a member. Bounded to named prospects on
+   purpose — a sales role with an open-ended audience becomes an outbound
+   spam engine, which would cost the club more than the memberships are
+   worth."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-shinshi-sales"
+  :yakuwari/mailbox "membership@shinshi.club"
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required
+    :note "Every outbound message here reaches a real person who did not ask for it."}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :pricing.change :decision :blocked
+    :note "A sales role that can discount is a sales role that will. Pricing belongs to the director, and then to the principal."}]}
+
+ {:yakuwari/id :club-shinshi/marketer
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Make the club legible to people who would want it, without describing it
+   as something it is not. Claims about exclusivity are claims about other
+   members, so they are held to the same standard as claims about price."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :club-shinshi/supporter
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi"
+  :yakuwari/objective
+  "Answer members. A membership business's support queue is its retention
+   mechanism, so a slow answer here costs a member rather than a ticket."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 3}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/outward? true
+  :yakuwari/identity "network-awai/person-shinshi-supporter"
+  :yakuwari/mailbox "support@shinshi.club"
+  :yakuwari/capabilities
+  [{:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous
+    :note "A deletion request IS the authorisation."}]}]

@@ -1,0 +1,105 @@
+;; Fleet-level policy for awai network's business roles.
+;;
+;; This file governs ACTIVITY, not membership — the same split
+;; etzhayyim-fleet.edn draws. `businesses.edn` says which roles exist;
+;; this says how many may be working at once, who may run them, and what
+;; the fleet refuses to let any role do regardless of its own policy.
+;;
+;; A role's own :yakuwari/policy can only be as permissive as this allows.
+;; Where the two disagree the stricter wins — a role file is reviewed by
+;; whoever owns that business, and this file is the bound that survives a
+;; business owner being wrong.
+
+{:awai.fleet/version 1
+ :awai.fleet/org :network-awai
+ :awai.fleet/principal
+ {:principal/kind :legal-entity
+  :principal/name "AWAI Network, L.L.C."
+  :principal/registration "Delaware file no. 10704996"
+  :principal/jurisdiction "US-DE"
+  :principal/adr "90-docs/adr/2607289700-org-taxonomy-by-invocation-axis-network-awai.edn"}
+
+ ;; Global concurrency across ALL businesses, not per business. Six
+ ;; businesses each allowed their own comfortable ceiling would sum to a
+ ;; number no one chose — and the constraint is real (one machine's worth of
+ ;; runner subscriptions), so it belongs at the level where it actually
+ ;; binds. tamaki's etzhayyim-fleet.edn puts :global-wip here for the same
+ ;; reason.
+ :awai.fleet/resources
+ {:global-wip 6
+  :dispatch-per-tick 1
+  :respect-homeostasis true}
+
+ ;; Which roles get the next slot when more want one than there are slots.
+ ;; Deliberately boring weights: a role blocked on a human outranks one
+ ;; merely idle, because the blocked one already consumed work that will be
+ ;; wasted if it times out.
+ :awai.fleet/weights
+ {:blocked-on-human 3.0
+  :queue-depth 2.0
+  :staleness 1.0
+  :outward 0.5}
+
+ ;; Equal-score roles rotate by oldest dispatch, so an alphabetical prefix
+ ;; cannot monopolise capacity (`app-aozora` would otherwise always precede
+ ;; `nexus-x402`).
+ :awai.fleet/tie-break :oldest-dispatch
+
+ :awai.fleet/runners
+ [{:runner :claude :weight 3}
+  {:runner :codex :weight 2}]
+
+ ;; Ceilings no role may exceed, whatever its own file says. `effective`
+ ;; resolution is `yakuwari.policy/strictest-of`, so listing a capability
+ ;; here can only ever narrow a role's grant.
+ :awai.fleet/capability-ceiling
+ {;; Money. A role may propose spend; committing it is the principal's.
+  :spend.commit :approval-required
+  :pricing.change :approval-required
+
+  ;; Third-party accounts require a natural person or a registered entity.
+  ;; A role operates an account; it never owns one. Same boundary
+  ;; person-awai-ryo states for Prolific.
+  :account.create :blocked
+
+  ;; Irreversible in practice: production traffic and published words
+  ;; cannot be recalled once seen.
+  :deploy.production :approval-required
+  :content.publish :voice-required
+
+  ;; Merging is where a proposal becomes the fleet's problem.
+  :patch.integrate :approval-required
+
+  ;; Never gated. A deletion request IS the authorisation, and making a
+  ;; data subject wait on an approval queue is the failure mode that
+  ;; matters here.
+  :subject.erase :autonomous}
+
+ ;; Authority boundaries. Cross-business action is blocked outright: a role
+ ;; that could act on another business's repo would make the per-business
+ ;; review in businesses.edn meaningless, since approving one role would
+ ;; implicitly approve its reach into five other products.
+ :awai.fleet/authority
+ {:cross-business :blocked
+  :own-repo :propose-only
+  :force-push :blocked
+  :history-rewrite :blocked
+  :visibility-change :blocked}
+
+ ;; Where the fleet's own effect log lives. The current window is committed
+ ;; here in git so it is queryable without fetching anything; rolled-over
+ ;; history moves to DataLad + B2. See journal/README.md for why that split
+ ;; exists and what it costs.
+ :awai.fleet/journal
+ {:journal/current "journal/current.edn"
+  :journal/format :one-edn-map-per-line
+  :journal/rollover-at-bytes 4194304}
+
+ ;; Residency. Being resident changes latency and cost, never authority —
+ ;; kotoba-lang/yakuwari states this and it is load-bearing here: nothing in
+ ;; this file grants more because a role is warm.
+ :awai.fleet/residency
+ {:residency/substrate :murakumo
+  :residency/tick-interval-ms 300000
+  :residency/publish-interval-ms 900000
+  :residency/surface "https://murakumo.cloud/yakuwari/fleet.json"}}
