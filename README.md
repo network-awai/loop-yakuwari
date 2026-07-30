@@ -30,7 +30,7 @@ whether a role is well-formed, what a capability decision means, or how many
 runs a role should have — `kotoba-lang/yakuwari` owns all three. This repo
 owns which role goes next, and the data saying what the roles are.
 
-Design: superproject **ADR-2607300500**.
+Design: superproject **ADR-2607300800**.
 
 ## The six businesses
 
