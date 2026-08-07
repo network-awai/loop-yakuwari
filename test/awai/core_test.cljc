@@ -2,7 +2,9 @@
   (:require [clojure.test :refer [deftest is testing]]
             [yakuwari.spec :as spec]
             [awai.registry :as registry]
-            [awai.loop :as loop']))
+            [awai.loop :as loop']
+            [awai.dispatch :as dispatch]
+            [clojure.string :as str]))
 
 (def t0 1785000000000)
 
@@ -280,3 +282,154 @@
     (is (= 1 (count ids)))
     (is (= "network-awai/person-isekai-director" (:identity/repo (first ids))))
     (is (= "director@isekai.network" (:identity/mailbox (first ids))))))
+
+;; ---------------------------------------------------------------------------
+;; The acting half: effects become tamaki invocations
+;; ---------------------------------------------------------------------------
+
+(def dispatch-cfg
+  (dispatch/config fleet {:workspace "/ws"}))
+
+(deftest a-runner-is-picked-by-index-so-a-dispatch-can-be-replayed
+  (let [pool [{:runner :claude :weight 2} {:runner :codex :weight 1}]]
+    (testing "weights expand to slots rather than probabilities"
+      (is (= [:claude :claude :codex] (dispatch/runner-pool pool))))
+    (testing "the same n always yields the same runner"
+      (is (= :claude (dispatch/runner-for pool 0)))
+      (is (= :claude (dispatch/runner-for pool 1)))
+      (is (= :codex (dispatch/runner-for pool 2)))
+      (is (= :claude (dispatch/runner-for pool 3))))
+    (testing "a role nobody can fill yields nil rather than a default runner"
+      (is (nil? (dispatch/runner-for [] 0))))))
+
+(deftest the-goal-states-the-bound-the-run-executes-under
+  (let [goal (dispatch/goal-for
+              {:role/id :net-kotobase/sales :role/business :net-kotobase
+               :goal "Convert a named\n   engineering organisation."
+               :policy {:content.draft :autonomous
+                        :mail.send :approval-required
+                        :sla.commit :blocked}})]
+    (testing "the standing objective survives, without its source indentation"
+      (is (str/includes? goal "Convert a named engineering organisation.")))
+    (testing "a bound the model is not told about is one it discovers by breaking it"
+      (is (str/includes? goal "must not: sla.commit"))
+      (is (str/includes? goal "needs human approval before: mail.send")))
+    (testing "a grant needs no sentence — the objective already implies it"
+      (is (not (str/includes? goal "content.draft"))))))
+
+(deftest a-project-that-is-not-org-slash-repo-is-refused-rather-than-guessed
+  (is (= "/ws/orgs/network-awai/net-kotobase"
+         (dispatch/project-path dispatch-cfg "network-awai/net-kotobase")))
+  (is (nil? (dispatch/project-path dispatch-cfg "net-kotobase")))
+  (is (nil? (dispatch/project-path dispatch-cfg "a/b/c")))
+  (is (nil? (dispatch/project-path (dissoc dispatch-cfg :workspace)
+                                   "network-awai/net-kotobase"))))
+
+(deftest a-submit-carries-the-ceilinged-policy-not-the-role-file
+  (let [role (role-of :nexus-x402/marketer :nexus-x402
+                      :yakuwari/capabilities
+                      [{:capability :content.publish :decision :autonomous}])
+        effects (loop'/act fleet [role]
+                           {:dispatch [{:role/id :nexus-x402/marketer
+                                        :role/business :nexus-x402
+                                        :plan {:spawn 1 :reap []}}]})
+        s (first (:submits (dispatch/plan dispatch-cfg effects [role] [])))]
+    (testing "the fleet ceiling reached the record, so re-reading the role cannot widen it"
+      (is (= :voice-required (:content.publish (:policy s)))))
+    (testing "and the same narrowed decision reached the prose the runner reads"
+      (is (str/includes? (nth (:argv s) 1) "voice before: content.publish")))))
+
+(deftest a-spawn-for-an-unresolvable-project-is-skipped-not-guessed
+  (let [role (role-of :nexus-x402/marketer :nexus-x402
+                      :yakuwari/project "not-org-shaped")
+        effects (loop'/act fleet [role]
+                           {:dispatch [{:role/id :nexus-x402/marketer
+                                        :role/business :nexus-x402
+                                        :plan {:spawn 1 :reap []}}]})
+        s (first (:submits (dispatch/plan dispatch-cfg effects [role] [])))]
+    (is (= :unresolvable-project (:skip s)))
+    (is (nil? (:argv s)))))
+
+(deftest the-runner-rotates-on-what-a-role-already-has
+  (let [role (role-of :nexus-x402/marketer :nexus-x402
+                      :yakuwari/runners [{:runner :claude :weight 1}
+                                         {:runner :codex :weight 1}])
+        effects (loop'/act fleet [role]
+                           {:dispatch [{:role/id :nexus-x402/marketer
+                                        :role/business :nexus-x402
+                                        :plan {:spawn 1 :reap []}}]})
+        with-none (dispatch/plan dispatch-cfg effects [role] [])
+        with-one (dispatch/plan dispatch-cfg effects [role]
+                                [(run-of "run-1" :nexus-x402/marketer :running)])]
+    (testing "two processes reading the same runs.edn pick the same runner"
+      (is (= :claude (:runner (first (:submits with-none)))))
+      (is (= :codex (:runner (first (:submits with-one))))))))
+
+(deftest a-reap-cancels-in-tamaki-rather-than-only-forgetting-locally
+  (let [effects {:reap [{:effect :reap :role/id :x/y :run/id "run-9"}] :spawn []}
+        p (dispatch/plan dispatch-cfg effects [] [])]
+    (is (= 1 (count (:cancels p))))
+    (is (= ["cancel" "run-9"] (subvec (first (:cancels p)) 0 2)))))
+
+(deftest a-run-tamaki-no-longer-knows-is-reported-not-dropped
+  (let [persisted [(run-of "run-1" :a/b :running) (run-of "run-2" :a/b :queued)]
+        {:keys [runs orphans]}
+        (dispatch/merge-statuses
+         persisted
+         [{:agent.run/id "run-1" :agent.run/status :succeeded
+           :agent.run/updated-at (+ t0 5000)}])]
+    (testing "the status tamaki reports wins over the one on record"
+      (is (= :succeeded (:agent.run/status (first runs)))))
+    (testing "a run that vanished still occupies a slot until someone looks"
+      (is (= ["run-2"] (mapv :agent.run/id orphans))))
+    (testing "terminal runs stop occupying a slot"
+      (is (= ["run-2"] (mapv :agent.run/id (dispatch/prune runs)))))))
+
+(deftest a-queued-run-nobody-leased-is-named-rather-than-reaped
+  (let [rs [(run-of "run-1" :a/b :queued t0)
+            (run-of "run-2" :a/b :queued (+ t0 900000))
+            (run-of "run-3" :a/b :running t0)]
+        stuck (dispatch/stuck dispatch-cfg rs (+ t0 900000))]
+    (testing "only the one past the grace period, and only because it is queued"
+      (is (= ["run-1"] (mapv :agent.run/id stuck)))
+      (is (= 900000 (:queued-ms (first stuck)))))))
+
+(deftest the-role-linkage-is-added-because-tamaki-does-not-know-who-asked
+  (let [run {:agent.run/id "run-1" :agent.run/status :queued
+             :agent.run/goal "g" :agent.run/created-at t0}
+        linked (dispatch/link run {:role/id :net-kotobase/sales
+                                   :role/business :net-kotobase
+                                   :policy {:mail.send :approval-required}})]
+    (testing "without this key reconcile/runs-for matches nothing and respawns"
+      (is (= :net-kotobase/sales (:agent.run/yakuwari linked))))
+    (is (= {:mail.send :approval-required} (:yakuwari/policy linked)))))
+
+(deftest a-submit-is-retargeted-at-an-isolated-tree-not-the-shared-checkout
+  (let [role (role-of :net-kotobase/engineer :net-kotobase)
+        effects (loop'/act fleet [role]
+                           {:dispatch [{:role/id :net-kotobase/engineer
+                                        :role/business :net-kotobase
+                                        :plan {:spawn 1 :reap []}}]})
+        s (first (:submits (dispatch/plan dispatch-cfg effects [role] [])))
+        r (dispatch/retarget s "/runs/awai-net-kotobase-engineer-1")]
+    (testing "the role resolves the shared checkout; only that is kept as source"
+      (is (= "/ws/orgs/network-awai/net-kotobase" (:source-project r))))
+    (testing "what the agent may edit is the isolated tree"
+      (is (= "/runs/awai-net-kotobase-engineer-1" (:project r)))
+      (is (= "/runs/awai-net-kotobase-engineer-1"
+             (nth (:argv r) (inc (.indexOf (to-array (:argv r)) "--project"))))))
+    (testing "the shared checkout appears nowhere in what tamaki is told"
+      (is (not (some #{"/ws/orgs/network-awai/net-kotobase"} (:argv r)))))
+    (testing "the goal is not rebuilt, only the project value is replaced"
+      (is (= (nth (:argv s) 1) (nth (:argv r) 1))))))
+
+(deftest a-worktree-branch-names-the-role-and-cannot-collide-with-a-repo-branch
+  (is (= "awai/net-kotobase-engineer-1785"
+         (dispatch/worktree-branch :net-kotobase/engineer 1785)))
+  (is (str/starts-with? (dispatch/worktree-branch :a/b 1) "awai/")))
+
+(deftest dispatch-refuses-to-run-in-a-shared-tree-when-no-worktree-root-is-set
+  (testing "absent is the default, and absent means refuse rather than fall back"
+    (is (nil? (:worktree-root (dispatch/config {}))))
+    (is (= "/runs" (:worktree-root (dispatch/config
+                                    {:awai.fleet/dispatch {:worktree-root "/runs"}}))))))

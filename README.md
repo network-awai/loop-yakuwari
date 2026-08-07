@@ -9,6 +9,7 @@ businesses.edn            the six businesses, their role sets, and what they LAC
 yakuwari/<business>.edn   the roles themselves (31 across 6 files)
 src/awai/registry.cljc    cross-file agreement + the fleet ceiling
 src/awai/loop.cljc        observe -> evaluate -> decide -> act -> record-evidence
+src/awai/dispatch.cljc    effects -> tamaki invocations (the acting half)
 bin/awai.cljs             the CLI (nbb; all I/O lives here)
 journal/                  append-only evidence; current window in git
 deploy/                   LaunchAgent residency on murakumo
@@ -78,6 +79,20 @@ nbb bin/awai.cljs identities   # the person-* repos the registry expects
 nbb bin/awai.cljs project      # the display model, as EDN
 nbb bin/awai.cljs tick         # one cycle, dry-run
 nbb bin/awai.cljs tick --apply # ... and record it
+
+nbb bin/awai.cljs runs             # what currently occupies a slot
+nbb bin/awai.cljs sync [--apply]   # refresh statuses; release finished trees
+nbb bin/awai.cljs dispatch         # a cycle, showing the tamaki argv it would run
+nbb bin/awai.cljs dispatch --apply # ... and actually submit and start them
+```
+
+`dispatch` needs two machine-local paths that are deliberately not in
+`fleet.edn` — a checkout location is not fleet policy, and committing one
+makes the file wrong on every other machine:
+
+```sh
+export AWAI_WORKSPACE=~/github/com-junkawasaki   # holds tamaki and the business repos
+export AWAI_WORKTREE_ROOT=/var/tmp/awai-runs     # per-run trees, OUTSIDE the superproject
 ```
 
 Current state:
@@ -162,15 +177,41 @@ npm test    # nbb; needs sibling kotoba-lang/yakuwari
 
 ## Status
 
-**The deciding half is real; the acting half is not wired.** `tick` observes,
-scores, decides and records evidence against the actual 31 roles. But no
-dispatcher turns a `:spawn` effect into an `agent.run`, so `journal/runs.edn`
-does not exist and every role projects as `:starved` — desired 1, nothing
-running. That label is correct, not a bug: nothing is executing.
+**Both halves are wired. Nothing executes, because this machine has no
+executor.** `dispatch` turns a `:spawn` effect into a real tamaki AgentRun —
+submit, isolated worktree, detached start, `journal/runs.edn`, status
+refresh, worktree release — and every one of those steps has been run against
+the live tamaki and a live repo. What it will not do is submit into a runtime
+that cannot start the run: `tamaki doctor` reports `:kotoba-code {:ok? false}`
+here (the checkout has `bin/claude`, no `bin/kotoba-code`), so `:local` mode
+has no executor and `dispatch --apply` refuses with that path named.
+
+That refusal is the design, not a workaround. A run submitted into a runtime
+that never starts it stays `:queued`, and `reconcile/stale-run?` only reaps
+`:leased` runs — so it would hold its slot forever, and six of them would stop
+the fleet silently. Checking first turns a permanent jam into one line of
+output. `sync` names any that slip through anyway as `STUCK`.
+
+Measured 2026-08-07, because both numbers change the design:
+
+- `tamaki status` (all runs) is **5.2 MB / 20,804 lines / 3m04s** — longer
+  than this loop's own 300 s tick. `refresh` therefore asks per run
+  (`status <id>`, 1 KB / 1m26s), so the cost is bounded by `:global-wip`
+  instead of by the size of tamaki's history, and the ordinary state — no
+  live runs — costs nothing.
+- tamaki's `:local` mode runs the agent **in `--project` itself**; only
+  `actor reconcile` prepares a worktree. Pointing it at `orgs/<org>/<repo>`
+  would let a parallel session's `git checkout` revert uncommitted work, so
+  `dispatch` branches its own tree from the business repo's freshly fetched
+  default branch and refuses outright when `AWAI_WORKTREE_ROOT` is unset.
+  There is no fallback, because the fallback would be the shared checkout.
 
 What that means concretely:
 
-- `check`, `roles`, `ceiling`, `identities`, `project`, `tick` all work today.
+- `check`, `roles`, `ceiling`, `identities`, `project`, `tick`, `runs`,
+  `sync`, `dispatch` all work today.
+- Roles still project as `:starved` until an executor exists. The label
+  remains correct rather than a bug.
 - The 15 `person-*` identity repos are listed by `awai identities`; whether
   they exist yet is a separate step, and their mailboxes need Cloudflare Email
   Routing, which is an owner action with a zone token.
