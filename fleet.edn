@@ -95,6 +95,27 @@
   :journal/format :one-edn-map-per-line
   :journal/rollover-at-bytes 4194304}
 
+ ;; How a granted slot becomes a bounded execution. `etzhayyim/tamaki` owns
+ ;; durable agent execution — one AgentRun identity, an append-only event
+ ;; history, the worktree per runner — and `yakuwari.reconcile` was extracted
+ ;; from `kotoba.tamaki.actor`, so this is the same lineage rejoining rather
+ ;; than a second runner.
+ ;;
+ ;; Paths here are RELATIVE to the workspace, and the workspace itself is not
+ ;; in this file: a checkout location is not fleet policy, and committing one
+ ;; makes the file wrong on every other machine. `awai` resolves it from
+ ;; AWAI_WORKSPACE, or by walking up to a `manifest/west.yml`.
+ :awai.fleet/dispatch
+ {:tamaki "orgs/etzhayyim/tamaki/bin/tamaki"
+  :project-root "orgs"
+  :mode :local
+
+  ;; A run still :queued this long after submission was never leased.
+  ;; Reported, never reaped: `reconcile/stale-run?` only reaps :leased runs,
+  ;; so a queued one holds its slot forever — and the fix for that is finding
+  ;; out why tamaki did not start it, not deleting the evidence.
+  :queued-grace-ms 900000}
+
  ;; Residency. Being resident changes latency and cost, never authority —
  ;; kotoba-lang/yakuwari states this and it is load-bearing here: nothing in
  ;; this file grants more because a role is warm.
