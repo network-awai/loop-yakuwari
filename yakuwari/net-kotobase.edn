@@ -120,4 +120,32 @@
     :note "Triage and acknowledgement under an SLA clock. Escalation to a fix still goes through engineer."}
    {:capability :customer.contact :decision :approval-required}
    {:capability :subject.erase :decision :autonomous}
-   {:capability :data.delete :decision :blocked}]}]
+   {:capability :data.delete :decision :blocked}]}
+ ;; kaizen-analyst — 2026-08-08. Added to the three businesses that have a
+ ;; 回遊 read face (shinshi.club / babiniku.net / kotobase.net); the other
+ ;; three have nothing to read yet, and a role with no measurement to read
+ ;; would be a role that invents its findings.
+ ;;
+ ;; The capability set is narrow on purpose. This role may PROPOSE and may
+ ;; not decide: `cloud-itonami.kaizen` tags the effect `:read-only` precisely
+ ;; because approving it costs attention, and attention is the scarce thing.
+ ;; A role that could approve its own findings would be a backlog generator
+ ;; with a governance label on it.
+ {:yakuwari/id :net-kotobase/kaizen-analyst
+  :yakuwari/business :net-kotobase
+  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/objective
+  "Read what this site's own 回遊 measurement says and turn the single most
+   answerable question into one proposal per round. Never a remedy: the
+   measurement holds counts and dates with no visitor identity, so it can
+   locate where attention stops and cannot say why. A round with nothing to
+   say ends with nothing filed."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.create :decision :autonomous
+    :note "Proposes into cloud-itonami's queue as :proposed; a human clears it. The narrow ingress key cannot approve."}
+   {:capability :issue.triage :decision :autonomous}
+   {:capability :patch.create :decision :approval-required
+    :note "An issue here is a question. Turning it into a change is another role's work, and doing both would let a guess about cause become a patch."}]}
+]

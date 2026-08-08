@@ -20,7 +20,8 @@
   :designer "owns the product's presentation and interaction"
   :sales "converts a named prospect into a paying customer"
   :marketer "makes the product findable and legible to people who have not heard of it"
-  :supporter "answers the people already using it"}
+  :supporter "answers the people already using it"
+  :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"}
 
  ;; sales and supporter and director correspond OUTWARD — they hold a
  ;; mailbox and a did:web (owner decision 2026-07-30). engineer, designer and
@@ -45,16 +46,16 @@
    :business/repo "network-awai/club-shinshi"
    :business/domain "shinshi.club"
    :business/what "Membership club. Operated by JK Inc. (BVI); shared contracts, legal and operations live in the root repo while the app and its two actor modules are siblings."
-   :business/roles [:director :engineer :designer :sales :marketer :supporter]
+   :business/roles [:director :engineer :designer :sales :marketer :supporter :kaizen-analyst]
    :business/roles-absent []
-   :business/note "The only business carrying all six. Membership is sold to named people, so sales is a real function rather than a funnel."}
+   :business/note "The only business carrying all six, plus the kaizen-analyst added 2026-08-08 when shinshi.club got a 回遊 read face. Membership is sold to named people, so sales is a real function rather than a funnel."}
 
   {:business/id :net-babiniku
    :business/name "net babiniku"
    :business/repo "network-awai/net-babiniku"
    :business/domain "babiniku.net"
    :business/what "Chat with an AI character whose body is a live-rendered VRM avatar — VTuber presentation rather than a static portrait. An LLM-persona node proposes {:dialogue :emotion :motion-cue}; a governor is the only path to a renderable turn."
-   :business/roles [:director :engineer :designer :marketer :supporter]
+   :business/roles [:director :engineer :designer :marketer :supporter :kaizen-analyst]
    :business/roles-absent
    [{:role :sales
      :why "Consumer self-serve. Nobody is negotiated with, so there is nothing for a sales role to do that marketer and supporter do not already cover."}]}
@@ -64,7 +65,7 @@
    :business/repo "network-awai/net-kotobase"
    :business/domain "kotobase.net"
    :business/what "Content-addressed knowledge-graph BaaS, pinning and hosting. Three plans separated by who carries operational responsibility: P2P, Secure Managed (99.9% SLA with credits), Enterprise (99.999%, by contract)."
-   :business/roles [:director :engineer :sales :marketer :supporter]
+   :business/roles [:director :engineer :sales :marketer :supporter :kaizen-analyst]
    :business/roles-absent
    [{:role :designer
      :why "The product surface is an API, runbooks and plan documents — presentation work here is documentation, which engineer and marketer own between them. Add a designer when a console ships."}]
