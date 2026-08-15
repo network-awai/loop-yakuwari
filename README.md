@@ -1,12 +1,13 @@
 # loop-yakuwari
 
-The operating roles of awai network's six businesses — what each role is for,
+The operating roles of awai network's eight startup businesses — what each role is for,
 what it may do alone, and which one gets the next slot.
 
 ```
 fleet.edn                 global WIP, runner pool, weights, capability ceiling
-businesses.edn            the six businesses, their role sets, and what they LACK
-yakuwari/<business>.edn   the roles themselves (31 across 6 files)
+businesses.edn            the eight businesses, their role sets, and what they LACK
+workforce.edn             shared job/cadence/capability templates
+yakuwari/<business>.edn   authored business-specific roles (templates fill declared gaps)
 src/awai/registry.cljc    cross-file agreement + the fleet ceiling
 src/awai/loop.cljc        observe -> evaluate -> decide -> act -> record-evidence
 src/awai/dispatch.cljc    effects -> tamaki invocations (the acting half)
@@ -34,16 +35,18 @@ owns which role goes next, and the data saying what the roles are.
 Design: superproject **ADR-2607300800**. The bounded Cloud Itonami sales
 mailbox design is [ADR-0001](docs/adr/0001-j-cloud-itonami-sales-mailbox.md).
 
-## The six businesses
+## The eight businesses
 
 | business | roles | deliberately absent |
 |---|---|---|
-| `network-isekai` | director engineer designer marketer supporter | sales — an open creator platform has no named prospects |
-| `club-shinshi` | all six | — |
-| `net-babiniku` | director engineer designer marketer supporter | sales — consumer self-serve |
-| `net-kotobase` | director engineer sales marketer supporter | designer — the surface is an API and runbooks |
-| `app-aozora` | director engineer designer marketer supporter | sales — fleet infrastructure, not sold |
-| `nexus-x402` | director engineer sales marketer supporter | designer — comes from `x402-directory` |
+| `network-isekai` | 8 | sales — an open creator platform has no named prospects |
+| `club-shinshi` | 10 | — |
+| `net-babiniku` | 9 | sales — consumer self-serve |
+| `net-kotobase` | 9 | designer — the surface is an API and runbooks |
+| `app-aozora` | 8 | sales — fleet infrastructure, not sold |
+| `nexus-x402` | 8 | designer — comes from `x402-directory` |
+| `cloud-itonami` | 9 | — |
+| `cloud-murakumo` | 9 | — |
 
 **Absence is declared, not implied.** `yakuwari.spec` refuses a role with no
 objective, because a role nobody can state the purpose of is not reviewable.
@@ -78,6 +81,7 @@ nbb bin/awai.cljs roles        # every role, one line
 nbb bin/awai.cljs ceiling      # where fleet.edn narrows a role
 nbb bin/awai.cljs identities   # the person-* repos the registry expects
 nbb bin/awai.cljs project      # the display model, as EDN
+nbb bin/awai.cljs workforce    # complete Cloud Itonami Bot catalog, one EDN form
 nbb bin/awai.cljs tick         # one cycle, dry-run
 nbb bin/awai.cljs tick --apply # ... and record it
 
@@ -100,9 +104,15 @@ Current state:
 
 ```
 $ nbb bin/awai.cljs check
-businesses 6 | roles 31 | outward 15 | narrowed by ceiling 0
+businesses 8 | roles 70 | outward 21 | narrowed by ceiling 0
 check: OK
 ```
+
+`workforce` is the deterministic projection consumed by Cloud Itonami. It
+contains responsibility and capability-policy metadata, not execution grants:
+the resident app independently admits one business Git root and retains its
+own approval governor. Missing source or an invalid partial catalog fails the
+whole provisioning operation instead of creating half a company.
 
 ## The decisions worth knowing
 

@@ -80,6 +80,95 @@
   (into {} (map (juxt :business/id identity)
                 (:awai.businesses/businesses businesses))))
 
+(defn complete-roles
+  "Fill declared startup jobs that do not have a richer authored role map.
+
+  Authored roles always win. Templates create membership, objectives and
+  policy; they never create a role the business did not declare. Outward
+  identity remains explicit business data rather than being guessed from a
+  domain or role name."
+  [businesses workforce authored]
+  (let [templates (:awai.workforce/templates workforce)
+        authored-by-id (into {} (map (juxt :yakuwari/id identity)) authored)
+        generated
+        (for [business (:awai.businesses/businesses businesses)
+              kind (:business/roles business)
+              :let [id (keyword (name (:business/id business)) (name kind))
+                    template (get templates kind)]
+              :when (and template (not (contains? authored-by-id id)))
+              :let [outward (get-in business [:business/outward kind])
+                    focus (get-in business [:business/job-focus kind])]]
+          (cond->
+           {:yakuwari/id id
+            :yakuwari/business (:business/id business)
+            :yakuwari/project (:business/repo business)
+            :yakuwari/objective
+            (str (:yakuwari/objective template)
+                 " Business context: " (:business/what business)
+                 (when focus (str " Product-specific focus: " focus)))
+            :yakuwari/scale (:yakuwari/scale template)
+            :yakuwari/runners (:yakuwari/runners template)
+            :yakuwari/capabilities (:yakuwari/capabilities template)
+            :bot/role (:bot/role template)
+            :bot/name (:bot/name template)
+            :bot/cadence-minutes (:bot/cadence-minutes template)
+            :yakuwari/generated-from :awai.workforce/template}
+            outward
+            (assoc :yakuwari/outward? true
+                   :yakuwari/identity (:identity outward)
+                   :yakuwari/mailbox (:mailbox outward))))]
+    (vec (concat authored generated))))
+
+(defn workforce-bots
+  "Project effective roles into Cloud Itonami Bot jobs.
+
+  The projection carries semantic capability decisions for explanation. It
+  is not an execution grant: Cloud Itonami still intersects each entry with
+  the Bot's concrete tool/workspace grant."
+  [{:keys [fleet businesses workforce roles]}]
+  (let [bx (business-index businesses)
+        templates (:awai.workforce/templates workforce)]
+    {:schema "network.awai.workforce-bots.v1"
+     :businesses (count (:awai.businesses/businesses businesses))
+     :roles
+     (mapv
+      (fn [role]
+        (let [business (get bx (:yakuwari/business role))
+              kind (keyword (name (:yakuwari/id role)))
+              template (get templates kind)
+              effective (ceilinged-policy fleet role)
+              caps (mapv (fn [entry]
+                           {:capability (:capability entry)
+                            :decision (get effective (:capability entry) :blocked)
+                            :note (:note entry)})
+                         (:yakuwari/capabilities role))]
+          {:key (str (name (:business/id business)) "/" (name kind))
+           :business {:id (:business/id business)
+                      :name (:business/name business)
+                      :domain (:business/domain business)
+                      :repo (:business/repo business)
+                      :what (:business/what business)}
+           :role {:id kind
+                  :job (or (:bot/role role) (:bot/role template) kind)
+                  :name (or (:bot/name role) (:bot/name template)
+                            (str/capitalize (str/replace (name kind) #"-" " ")))}
+           :objective (:yakuwari/objective role)
+           :responsibilities
+           [(:yakuwari/objective role)
+            "Act only inside this business and leave cross-business work blocked."
+            "Record observed evidence separately from forecasts and proposals."]
+           :capabilities caps
+           :project (:yakuwari/project role)
+           :workspace (str "orgs/" (:yakuwari/project role))
+           :cadence-minutes (or (:bot/cadence-minutes role)
+                                (:bot/cadence-minutes template)
+                                1440)
+           :outward? (boolean (:yakuwari/outward? role))
+           :identity (:yakuwari/identity role)
+           :mailbox (:yakuwari/mailbox role)}))
+      (sort-by (juxt (comp str :yakuwari/business)
+                     (comp str :yakuwari/id)) roles))}))
+
 (defn validate-fleet
   "Every disagreement between `businesses.edn`, the role files and
   `fleet.edn`, reported at once.

@@ -1,4 +1,4 @@
-;; The six awai businesses and the role set each one needs.
+;; The eight startup businesses and the role set each one needs.
 ;;
 ;; MEMBERSHIP, not activity — `fleet.edn` governs how many may run at once.
 ;;
@@ -17,6 +17,9 @@
  :awai.businesses/roles-vocabulary
  {:director "sets what this business is trying to do next, and is the party outward correspondence reaches"
   :engineer "changes the product; proposes patches, never merges them"
+  :product-manager "turns observed needs into one bounded, evidence-backed increment"
+  :qa "tries to falsify release claims and records reproducible failures"
+  :financial-chief "keeps cost, revenue, runway and pricing explicit; never moves funds"
   :designer "owns the product's presentation and interaction"
   :sales "converts a named prospect into a paying customer"
   :marketer "makes the product findable and legible to people who have not heard of it"
@@ -36,7 +39,7 @@
    :business/repo "network-awai/network-isekai"
    :business/domain "isekai.network"
    :business/what "Play and fork CLJ/EDN games in the browser — CodePen for games. A game is data: an EDN scene plus Clojure-subset logic, forkable as a kotoba-git commit."
-   :business/roles [:director :engineer :designer :marketer :supporter]
+   :business/roles [:director :product-manager :engineer :qa :designer :marketer :supporter :financial-chief]
    :business/roles-absent
    [{:role :sales
      :why "An open creator platform has no named prospects to convert — growth is people forking games, not a pipeline. Add sales if a paid tier for studios ships."}]}
@@ -46,7 +49,7 @@
    :business/repo "network-awai/club-shinshi"
    :business/domain "shinshi.club"
    :business/what "Membership club. Operated by JK Inc. (BVI); shared contracts, legal and operations live in the root repo while the app and its two actor modules are siblings."
-   :business/roles [:director :engineer :designer :sales :marketer :supporter :kaizen-analyst]
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief :kaizen-analyst]
    :business/roles-absent []
    :business/note "The only business carrying all six, plus the kaizen-analyst added 2026-08-08 when shinshi.club got a 回遊 read face. Membership is sold to named people, so sales is a real function rather than a funnel."}
 
@@ -55,7 +58,7 @@
    :business/repo "network-awai/net-babiniku"
    :business/domain "babiniku.net"
    :business/what "Chat with an AI character whose body is a live-rendered VRM avatar — VTuber presentation rather than a static portrait. An LLM-persona node proposes {:dialogue :emotion :motion-cue}; a governor is the only path to a renderable turn."
-   :business/roles [:director :engineer :designer :marketer :supporter :kaizen-analyst]
+   :business/roles [:director :product-manager :engineer :qa :designer :marketer :supporter :financial-chief :kaizen-analyst]
    :business/roles-absent
    [{:role :sales
      :why "Consumer self-serve. Nobody is negotiated with, so there is nothing for a sales role to do that marketer and supporter do not already cover."}]}
@@ -65,7 +68,7 @@
    :business/repo "network-awai/net-kotobase"
    :business/domain "kotobase.net"
    :business/what "Content-addressed knowledge-graph BaaS, pinning and hosting. Three plans separated by who carries operational responsibility: P2P, Secure Managed (99.9% SLA with credits), Enterprise (99.999%, by contract)."
-   :business/roles [:director :engineer :sales :marketer :supporter :kaizen-analyst]
+   :business/roles [:director :product-manager :engineer :qa :sales :marketer :supporter :financial-chief :kaizen-analyst]
    :business/roles-absent
    [{:role :designer
      :why "The product surface is an API, runbooks and plan documents — presentation work here is documentation, which engineer and marketer own between them. Add a designer when a console ships."}]
@@ -76,7 +79,7 @@
    :business/repo "network-awai/app-aozora"
    :business/domain "aozora.app"
    :business/what "The canonical AT Protocol boundary for the fleet: PDS, AppView, XRPC adapter, feeds, search and actor profile publication. Domain repos publish through it rather than running their own PDS."
-   :business/roles [:director :engineer :designer :supporter :marketer]
+   :business/roles [:director :product-manager :engineer :qa :designer :supporter :marketer :financial-chief]
    :business/roles-absent
    [{:role :sales
      :why "Infrastructure the fleet's own organisms depend on, not a product sold to outsiders. Its consumers are sibling repos, which do not need converting."}]}
@@ -86,8 +89,42 @@
    :business/repo "network-awai/nexus-x402"
    :business/domain "x402.nexus"
    :business/what "Self-hosted x402 payment facilitator and gateway — the sovereign equivalent of a closed monetization gateway, live with three registered sellers. The facilitator holds no keys; each seller settles to its own treasury."
-   :business/roles [:director :engineer :sales :marketer :supporter]
+   :business/roles [:director :product-manager :engineer :qa :sales :marketer :supporter :financial-chief]
    :business/roles-absent
    [{:role :designer
      :why "The directory page and llms.txt renderer come from kotoba-lang/x402-directory; this repo adds only a thin branding layer, so there is no presentation surface of its own to own."}]
-   :business/note "Sellers are onboarded one at a time by name — sales here is seller onboarding, not end-user acquisition."}]}
+   :business/note "Sellers are onboarded one at a time by name — sales here is seller onboarding, not end-user acquisition."}
+
+  {:business/id :cloud-itonami
+   :business/name "Cloud Itonami"
+   :business/repo "network-awai/cloud-itonami"
+   :business/domain "itonami.cloud"
+   :business/what "AI-agent and robotics operating system for governed business work: capture, identity, work, communication and bounded autonomous execution share one auditable product surface."
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief]
+   :business/roles-absent []
+   :business/outward
+   {:director {:identity "network-awai/person-itonami-director" :mailbox "director@itonami.cloud"}
+    :sales {:identity "network-awai/person-itonami-sales" :mailbox "sales@itonami.cloud"}
+    :supporter {:identity "network-awai/person-itonami-supporter" :mailbox "support@itonami.cloud"}}
+   :business/job-focus
+   {:director "Keep product identity, governance and deployment evidence aligned."
+    :engineer "Preserve resident reliability and capability confinement across CLI, MCP and UI."
+    :qa "Verify resident, CLI, MCP and browser paths rather than treating unit tests as production proof."
+    :financial-chief "Separate measured revenue and provider cost from modeled opportunity."}}
+
+  {:business/id :cloud-murakumo
+   :business/name "murakumo.cloud"
+   :business/repo "network-awai/cloud-murakumo"
+   :business/domain "murakumo.cloud"
+   :business/what "Distributed private inference and generation on an owned Mac-mini fleet, with public routing, capacity, recovery and execution evidence kept distinct."
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief]
+   :business/roles-absent []
+   :business/outward
+   {:director {:identity "network-awai/person-murakumo-director" :mailbox "director@murakumo.cloud"}
+    :sales {:identity "network-awai/person-murakumo-sales" :mailbox "sales@murakumo.cloud"}
+    :supporter {:identity "network-awai/person-murakumo-supporter" :mailbox "support@murakumo.cloud"}}
+   :business/job-focus
+   {:director "Keep public promises bounded by measured fleet capacity and recovery evidence."
+    :engineer "Maintain routing, worker reachability, capacity and actual distributed execution."
+    :qa "Test failover, fresh inventory and multi-node execution separately."
+    :financial-chief "Track node, energy and provider costs without treating nominal capacity as sold revenue."}}]}

@@ -160,6 +160,48 @@
       (is (contains? (set (map :problem ps)) :role-unknown-business))
       (is (contains? (set (map :problem ps)) :absent-role-present)))))
 
+(deftest workforce-templates-fill-only-declared-missing-roles
+  (let [businesses {:awai.businesses/businesses
+                    [{:business/id :x :business/name "X" :business/domain "x.test"
+                      :business/repo "network-awai/x" :business/what "does x"
+                      :business/roles [:director :qa]}]}
+        workforce {:awai.workforce/templates
+                   {:qa {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 60
+                         :yakuwari/objective "falsify it"
+                         :yakuwari/scale {:min 0 :desired 1 :max 1}
+                         :yakuwari/runners [{:runner :codex :weight 1}]
+                         :yakuwari/capabilities
+                         [{:capability :test.run :decision :autonomous}]}
+                    :engineer {:yakuwari/objective "should not appear"}}}
+        authored [(role-of :x/director :x)]
+        completed (registry/complete-roles businesses workforce authored)
+        by-id (into {} (map (juxt :yakuwari/id identity)) completed)]
+    (is (= #{:x/director :x/qa} (set (keys by-id))))
+    (is (= :awai.workforce/template (:yakuwari/generated-from (:x/qa by-id))))
+    (is (= "do the director job" (:yakuwari/objective (:x/director by-id)))
+        "an authored role wins over a template")))
+
+(deftest workforce-projection-carries-policy-but-does-not-call-it-a-grant
+  (let [businesses {:awai.businesses/businesses
+                    [{:business/id :x :business/name "X" :business/domain "x.test"
+                      :business/repo "network-awai/x" :business/what "does x"
+                      :business/roles [:qa]}]}
+        workforce {:awai.workforce/templates
+                   {:qa {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 60}}}
+        role (role-of :x/qa :x
+                      :yakuwari/capabilities
+                      [{:capability :deploy.production :decision :blocked}])
+        result (registry/workforce-bots
+                {:fleet fleet :businesses businesses :workforce workforce
+                 :roles [role]})
+        projected (first (:roles result))]
+    (is (= "network.awai.workforce-bots.v1" (:schema result)))
+    (is (= "x/qa" (:key projected)))
+    (is (= :qa (get-in projected [:role :job])))
+    (is (= :blocked (get-in projected [:capabilities 0 :decision])))
+    (is (nil? (:tools projected))
+        "semantic capability policy must not become a Cloud Itonami tool grant")))
+
 ;; ---------------------------------------------------------------------------
 ;; The loop
 ;; ---------------------------------------------------------------------------

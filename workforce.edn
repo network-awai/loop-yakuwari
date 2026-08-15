@@ -1,0 +1,119 @@
+;; Startup job templates. Rich business-specific yakuwari files override
+;; these maps. A declared role with no authored map is expanded here, so the
+;; shared job policy has one reviewable source while every objective still
+;; names its business and product-specific focus.
+
+{:awai.workforce/version 1
+ :awai.workforce/templates
+ {:director
+  {:bot/role :business-owner :bot/name "Business Owner" :bot/cadence-minutes 1440
+   :yakuwari/objective "Choose the next bounded outcome and reconcile product, customer, operational and financial evidence."
+   :yakuwari/scale {:min 0 :desired 1 :max 1}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :roadmap.set :decision :autonomous}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :mail.inbound :decision :autonomous}
+    {:capability :mail.send :decision :approval-required}
+    {:capability :spend.commit :decision :approval-required}]}
+
+  :product-manager
+  {:bot/role :product-manager :bot/name "Product Manager" :bot/cadence-minutes 720
+   :yakuwari/objective "Turn observed user and operator needs into one testable increment with acceptance evidence and named non-goals."
+   :yakuwari/scale {:min 0 :desired 1 :max 2}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :roadmap.propose :decision :autonomous}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :customer.contact :decision :approval-required}
+    {:capability :release.accept :decision :approval-required}]}
+
+  :engineer
+  {:bot/role :engineer :bot/name "Engineer" :bot/cadence-minutes 360
+   :yakuwari/objective "Deliver or propose the smallest verified engineering change that removes the highest current technical blocker."
+   :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 2 :blocker-count 1}}
+   :yakuwari/runners [{:runner :codex :weight 2} {:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :issue.triage :decision :autonomous}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :patch.create :decision :autonomous}
+    {:capability :patch.integrate :decision :approval-required}
+    {:capability :deploy.production :decision :approval-required}
+    {:capability :incident.respond :decision :autonomous}]}
+
+  :qa
+  {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 360
+   :yakuwari/objective "Try to falsify the release claim with reproducible tests, record the smallest counterexample, and block promotion when evidence is missing."
+   :yakuwari/scale {:min 0 :desired 1 :max 2 :scale-up-on {:blocker-count 1}}
+   :yakuwari/runners [{:runner :codex :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :test.run :decision :autonomous}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :patch.create :decision :autonomous}
+    {:capability :release.block :decision :autonomous}
+    {:capability :deploy.production :decision :blocked}]}
+
+  :designer
+  {:bot/role :designer :bot/name "Product Designer" :bot/cadence-minutes 720
+   :yakuwari/objective "Own the human-facing interaction and make the critical journey understandable, accessible and verifiable."
+   :yakuwari/scale {:min 0 :desired 1 :max 2}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :design.propose :decision :autonomous}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :patch.create :decision :autonomous}
+    {:capability :patch.integrate :decision :approval-required}]}
+
+  :sales
+  {:bot/role :sales :bot/name "Sales" :bot/cadence-minutes 720
+   :yakuwari/objective "Move one named, qualified prospect toward a truthful buying decision; never create an open-ended outbound audience."
+   :yakuwari/scale {:min 0 :desired 1 :max 2}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :mail.inbound :decision :autonomous}
+    {:capability :mail.send :decision :approval-required}
+    {:capability :customer.contact :decision :approval-required}
+    {:capability :content.draft :decision :autonomous}
+    {:capability :pricing.change :decision :blocked}]}
+
+  :marketer
+  {:bot/role :marketer :bot/name "Marketer" :bot/cadence-minutes 720
+   :yakuwari/objective "Make the product findable and legible using claims that point to current product or measured evidence."
+   :yakuwari/scale {:min 0 :desired 1 :max 2}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :content.draft :decision :autonomous}
+    {:capability :content.publish :decision :voice-required}
+    {:capability :spend.commit :decision :approval-required}]}
+
+  :supporter
+  {:bot/role :supporter :bot/name "Customer Support" :bot/cadence-minutes 360
+   :yakuwari/objective "Answer current users, turn recurring questions into fixes or documentation, and escalate product-impacting failures."
+   :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 3 :blocker-count 1}}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :mail.inbound :decision :autonomous}
+    {:capability :mail.send :decision :approval-required}
+    {:capability :issue.create :decision :autonomous}
+    {:capability :incident.respond :decision :autonomous}
+    {:capability :customer.contact :decision :approval-required}
+    {:capability :subject.erase :decision :autonomous}]}
+
+  :financial-chief
+  {:bot/role :financial-chief :bot/name "Financial Chief" :bot/cadence-minutes 1440
+   :yakuwari/objective "Keep revenue, cost, runway and pricing assumptions explicit, separating measured facts from forecasts and never moving or trading funds."
+   :yakuwari/scale {:min 0 :desired 1 :max 1}
+   :yakuwari/runners [{:runner :claude :weight 1}]
+   :yakuwari/capabilities
+   [{:capability :metrics.read :decision :autonomous}
+    {:capability :finance.read :decision :autonomous}
+    {:capability :budget.propose :decision :autonomous}
+    {:capability :pricing.change :decision :approval-required}
+    {:capability :spend.commit :decision :approval-required}
+    {:capability :funds.move :decision :blocked}
+    {:capability :trade.execute :decision :blocked}]}}}
