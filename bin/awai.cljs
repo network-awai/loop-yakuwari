@@ -86,10 +86,14 @@
       (binding [*print-fn* *print-err-fn*]
         (println (str "WARNING skipped " (:file s) " — " (name (:why s))
                       (when (:detail s) (str ": " (:detail s)))))))
-    {:fleet (read-edn (at "fleet.edn"))
-     :businesses (read-edn (at "businesses.edn"))
-     :roles roles
-     :skipped @skipped}))
+    (let [fleet (read-edn (at "fleet.edn"))
+          businesses (read-edn (at "businesses.edn"))
+          workforce (read-edn (at "workforce.edn"))]
+      {:fleet fleet
+       :businesses businesses
+       :workforce workforce
+       :roles (registry/complete-roles businesses workforce roles)
+       :skipped @skipped})))
 
 (defn- die [code] (.exit js/process code))
 
@@ -147,6 +151,12 @@
                     "  (" (:identity/role i) ")")))
     (println (str "-- " (count (registry/outward-identities roles))
                   " person-* repos expected"))))
+
+(defn cmd-workforce []
+  ;; EDN is the resident app's ingestion contract. It preserves keywords and
+  ;; sets without a second JSON naming convention, and stdout contains exactly
+  ;; one form so a caller either gets the whole catalog or refuses it.
+  (println (pr-str (registry/workforce-bots (load-registry)))))
 
 (defn- runs
   "Live runs — what currently occupies a slot.
@@ -582,12 +592,13 @@
       "roles" (cmd-roles)
       "ceiling" (cmd-ceiling)
       "identities" (cmd-identities)
+      "workforce" (cmd-workforce)
       "project" (cmd-project)
       "tick" (cmd-tick apply?)
       "runs" (cmd-runs)
       "sync" (cmd-sync apply?)
       "dispatch" (cmd-dispatch apply?)
-      (do (println "usage: awai <check|roles|ceiling|identities|project|tick|runs|sync|dispatch>")
+      (do (println "usage: awai <check|roles|ceiling|identities|workforce|project|tick|runs|sync|dispatch>")
           (die 2)))))
 
 ;; nbb passes script arguments as *command-line-args*; js/process.argv[1] is
