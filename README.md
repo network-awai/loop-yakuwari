@@ -202,9 +202,10 @@ not report the selected runner ready.
 
 A successful clean run must contain a commit beyond its recorded base. The
 worktree is then released while its `awai/...` proposal branch and an
-append-only `journal/proposals.edn` record remain for review. A successful but
-dirty run keeps its worktree so no generated patch is erased. Failed and
-no-change runs release both worktree and branch.
+append-only `journal/proposals.edn` record remain for review. Any dirty run,
+including one that timed out after producing a useful patch, keeps its
+worktree so generated work is never erased. Clean failed and no-change runs
+release both worktree and branch.
 
 That refusal is the design, not a workaround. A run submitted into a runtime
 that never starts it stays `:queued`, and `reconcile/stale-run?` only reaps

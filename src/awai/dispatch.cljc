@@ -110,7 +110,7 @@
   proposal, while an uncommitted patch retains its tree for review."
   [status dirty? changed?]
   (cond
-    (and (= :succeeded status) dirty?) :retained-dirty-worktree
+    dirty? :retained-dirty-worktree
     (and (= :succeeded status) changed?) :preserved-branch
     (= :succeeded status) :released-no-change
     :else :released-failure))
