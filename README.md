@@ -171,6 +171,10 @@ Being resident **changes latency and cost, never authority**
 (`kotoba-lang/yakuwari`). Nothing the installer does grants a role more than
 `fleet.edn` allows.
 
+For a dedicated resident checkout, set `AWAI_WORKSPACE` while installing.
+The LaunchAgent then reads business repos and Tamaki from that workspace while
+keeping this loop's mutable journals outside the shared checkout.
+
 ```sh
 nbb deploy/install.cljs            # dry run
 nbb deploy/install.cljs --apply    # write plists and bootstrap

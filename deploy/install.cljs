@@ -55,7 +55,9 @@
   (or (which "codex")
       (throw (ex-info "codex not on PATH — a qualified coding runner is required" {}))))
 
-(def workspace-root (path/resolve repo-root "../../.."))
+(def workspace-root
+  (or (.. js/process -env -AWAI_WORKSPACE)
+      (path/resolve repo-root "../../..")))
 (def worktree-root (path/join home ".cloud-itonami" "awai-worktrees"))
 
 (defn- sibling-check

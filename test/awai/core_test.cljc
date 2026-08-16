@@ -344,6 +344,17 @@
     (testing "a role nobody can fill yields nil rather than a default runner"
       (is (nil? (dispatch/runner-for [] 0))))))
 
+(deftest fleet-runner-admission-overrides-stale-role-preference
+  (let [effect {:role/id :cloud-itonami/supporter
+                :role/business :cloud-itonami
+                :runners [{:runner :claude :weight 1}]
+                :goal "Support one user."
+                :policy {}}
+        cfg (assoc dispatch-cfg :runners [{:runner :codex :weight 1}])
+        submit (dispatch/submit-argv cfg effect "cloud-itonami/app" 0)]
+    (is (= :codex (:runner submit)))
+    (is (= "codex" (last (:argv submit))))))
+
 (deftest successful-coding-output-is-never-erased
   (is (= :preserved-branch
          (dispatch/proposal-disposition :succeeded false true)))

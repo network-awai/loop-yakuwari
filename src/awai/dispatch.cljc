@@ -177,7 +177,11 @@
   built. Returns data so `bin/awai.cljs` performs a decision it did not make."
   [cfg {:keys [role/id role/business runners] :as effect} project n]
   (let [path (project-path cfg project)
-        runner (runner-for runners n)]
+        ;; Fleet runners are the admitted, live-qualified execution substrate.
+        ;; Role runner lists are preferences used only when no fleet ceiling is
+        ;; supplied; otherwise a stale role preference could bypass readiness.
+        admitted (or (seq (:runners cfg)) runners)
+        runner (runner-for admitted n)]
     (cond
       (nil? path) {:skip :unresolvable-project :role/id id :project project}
       (nil? runner) {:skip :no-runner :role/id id}
