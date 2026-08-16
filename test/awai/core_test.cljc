@@ -344,6 +344,16 @@
     (testing "a role nobody can fill yields nil rather than a default runner"
       (is (nil? (dispatch/runner-for [] 0))))))
 
+(deftest successful-coding-output-is-never-erased
+  (is (= :preserved-branch
+         (dispatch/proposal-disposition :succeeded false true)))
+  (is (= :retained-dirty-worktree
+         (dispatch/proposal-disposition :succeeded true true)))
+  (is (= :released-no-change
+         (dispatch/proposal-disposition :succeeded false false)))
+  (is (= :released-failure
+         (dispatch/proposal-disposition :failed true true))))
+
 (deftest the-goal-states-the-bound-the-run-executes-under
   (let [goal (dispatch/goal-for
               {:role/id :net-kotobase/sales :role/business :net-kotobase

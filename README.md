@@ -160,7 +160,9 @@ full, because a count would not say which file to fix.
 ## Residency
 
 `deploy/install.cljs` installs two LaunchAgents: `tick` every 300 s and
-`project` every 900 s. The tick runs on murakumo's own node, the same shape
+`project` every 900 s. The installer records the workspace, an external
+`~/.cloud-itonami/awai-worktrees` root, and the qualified Codex binary in the
+resident environment. The tick runs on murakumo's own node, the same shape
 `cloud-murakumo/organism/` uses — a Cloudflare Worker cannot host a
 JVM/Chicory runtime, so the only thing that should reach the edge is the
 resulting static artifact.
@@ -188,14 +190,17 @@ npm test    # nbb; needs sibling kotoba-lang/yakuwari
 
 ## Status
 
-**Both halves are wired. Nothing executes, because this machine has no
-executor.** `dispatch` turns a `:spawn` effect into a real tamaki AgentRun —
-submit, isolated worktree, detached start, `journal/runs.edn`, status
-refresh, worktree release — and every one of those steps has been run against
-the live tamaki and a live repo. What it will not do is submit into a runtime
-that cannot start the run: `tamaki doctor` reports `:kotoba-code {:ok? false}`
-here (the checkout has `bin/claude`, no `bin/kotoba-code`), so `:local` mode
-has no executor and `dispatch --apply` refuses with that path named.
+The admitted execution path is Tamaki's subscription-backed Codex runner.
+`dispatch` turns a `:spawn` effect into a real Tamaki AgentRun — submit,
+isolated worktree, detached start, `journal/runs.edn`, status refresh, and a
+preserved proposal — and refuses before submission when `tamaki doctor` does
+not report the selected runner ready.
+
+A successful clean run must contain a commit beyond its recorded base. The
+worktree is then released while its `awai/...` proposal branch and an
+append-only `journal/proposals.edn` record remain for review. A successful but
+dirty run keeps its worktree so no generated patch is erased. Failed and
+no-change runs release both worktree and branch.
 
 That refusal is the design, not a workaround. A run submitted into a runtime
 that never starts it stays `:queued`, and `reconcile/stale-run?` only reaps
@@ -221,8 +226,8 @@ What that means concretely:
 
 - `check`, `roles`, `ceiling`, `identities`, `project`, `tick`, `runs`,
   `sync`, `dispatch` all work today.
-- Roles still project as `:starved` until an executor exists. The label
-  remains correct rather than a bug.
+- Roles project as `:starved` until their first admitted run; the resident
+  tick then advances them one bounded execution at a time.
 - The 15 `person-*` identity repos are listed by `awai identities`; whether
   they exist yet is a separate step, and their mailboxes need Cloudflare Email
   Routing, which is an owner action with a zone token.

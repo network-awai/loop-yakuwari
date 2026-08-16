@@ -199,7 +199,8 @@
 
 (defn- dispatch-config [fleet]
   (dispatch/config fleet
-                   (cond-> {:workspace (workspace)}
+                   (cond-> {:workspace (workspace)
+                            :runners (:awai.fleet/runners fleet)}
                      ;; Machine-local like the workspace, and for the same
                      ;; reason: a checkout path is not fleet policy.
                      (.. js/process -env -AWAI_WORKTREE_ROOT)
@@ -245,15 +246,17 @@
   human notices, and six of those stop the fleet. Asking first turns that into
   one line of output.
 
-  Measured 2026-08-07: `:kotoba-code {:ok? false}` on this machine — the
-  checkout has `bin/claude` but no `bin/kotoba-code`, so `:local` mode has no
-  executor at all. That is the condition this check exists for."
+  The required executor is derived from the admitted runner pool. This avoids
+  admitting work because an unrelated provider happens to be installed."
   [cfg]
   (let [res (tamaki! cfg ["doctor"])]
     (if-not (map? (:value res))
       {:ready? false :why (or (:why res) :no-doctor-report) :detail (:detail res)}
       (let [d (:value res)
-            needed (case (:mode cfg) :local [:event-store :kotoba-code] [:event-store])
+            runner-needs (->> (:runners cfg) (map :runner) distinct vec)
+            needed (case (:mode cfg)
+                     :local (into [:event-store] runner-needs)
+                     [:event-store])
             missing (vec (remove #(get-in d [% :ok?]) needed))]
         (if (seq missing)
           {:ready? false :why :runtime-not-ready :missing missing
@@ -313,18 +316,54 @@
                     (if-not (:ok? added)
                       {:ok? false :why :worktree-add-failed :detail (:err added)}
                       {:ok? true :path p :branch wt-branch
-                       :source source :base branch})))))))))))
+                       :source source :base branch
+                       :base-sha (:out (git! p ["rev-parse" "HEAD"]))})))))))))))
+
+(defn- record-proposal!
+  [run head disposition]
+  (let [p (at "journal" "proposals.edn")
+        record {:proposal/version 1
+                :proposal/run (:agent.run/id run)
+                :proposal/role (:agent.run/yakuwari run)
+                :proposal/status (:agent.run/status run)
+                :proposal/source (:awai/worktree-source run)
+                :proposal/worktree (:awai/worktree run)
+                :proposal/branch (:awai/worktree-branch run)
+                :proposal/base (:awai/worktree-base-sha run)
+                :proposal/head head
+                :proposal/disposition disposition
+                :proposal/observed-at (.toISOString (js/Date.))}]
+    (fs/appendFileSync p (str (pr-str record) "\n"))
+    record))
 
 (defn- remove-worktree!
-  "Give back the tree a finished run was using. A worktree left behind is a
-  checkout of a branch nobody will merge, and thirty of them is how a repo
-  stops being readable."
-  [{:keys [awai/worktree awai/worktree-source awai/worktree-branch]}]
+  "Release failed/no-change trees, but never erase a successful coding result.
+
+  A clean committed success is preserved as a local proposal branch and
+  indexed in journal/proposals.edn. A dirty success keeps its worktree for
+  review. Failures are disposable and release both tree and branch."
+  [{:keys [awai/worktree awai/worktree-source awai/worktree-branch
+           awai/worktree-base-sha agent.run/status] :as run}]
   (when (and worktree worktree-source)
-    (git! worktree-source ["worktree" "remove" "--force" worktree])
-    (when worktree-branch
-      (git! worktree-source ["branch" "-D" worktree-branch]))
-    worktree))
+    (let [head (:out (git! worktree ["rev-parse" "HEAD"]))
+          dirty? (not (str/blank? (:out (git! worktree ["status" "--porcelain"]))))
+          changed? (and (seq head) (seq worktree-base-sha)
+                        (not= head worktree-base-sha))
+          disposition (dispatch/proposal-disposition status dirty? changed?)]
+      (case disposition
+        :retained-dirty-worktree
+        (do (record-proposal! run head :retained-dirty-worktree)
+            {:disposition :retained-dirty-worktree :path worktree :head head})
+
+        :preserved-branch
+        (do (record-proposal! run head :preserved-branch)
+            (git! worktree-source ["worktree" "remove" worktree])
+            {:disposition :preserved-branch :branch worktree-branch :head head})
+
+        (do (git! worktree-source ["worktree" "remove" "--force" worktree])
+            (when worktree-branch
+              (git! worktree-source ["branch" "-D" worktree-branch]))
+            {:disposition disposition :path worktree})))))
 
 (defn- tamaki-detached!
   "Start a run without waiting for it.
@@ -473,7 +512,11 @@
                     (Math/round (/ (:queued-ms s) 1000)) "s — submitted but never leased")))
     (cond
       (= :stale from) (die 1)
-      apply? (do (doseq [r terminal-runs] (remove-worktree! r))
+      apply? (do (doseq [r terminal-runs]
+                   (let [result (remove-worktree! r)]
+                     (println (str "      " (name (:disposition result))
+                                   (when-let [branch (:branch result)]
+                                     (str " — proposal branch " branch))))))
                  (write-runs! runs)
                  (println "  written → journal/runs.edn"))
       :else (println "  dry-run: nothing written, no tree released (--apply to record)"))))
@@ -528,7 +571,8 @@
                     (assoc (dispatch/link run s)
                            :awai/worktree (:path wt)
                            :awai/worktree-source (:source wt)
-                           :awai/worktree-branch (:branch wt)))))))))))
+                           :awai/worktree-branch (:branch wt)
+                           :awai/worktree-base-sha (:base-sha wt)))))))))))
 
 (defn cmd-dispatch [apply?]
   (let [{:keys [fleet roles]} (load-registry)
