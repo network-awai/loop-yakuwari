@@ -363,6 +363,8 @@
   (is (= :released-no-change
          (dispatch/proposal-disposition :succeeded false false)))
   (is (= :released-failure
+         (dispatch/proposal-disposition :failed false true)))
+  (is (= :retained-dirty-worktree
          (dispatch/proposal-disposition :failed true true))))
 
 (deftest the-goal-states-the-bound-the-run-executes-under
