@@ -103,6 +103,18 @@
     (when (seq pool)
       (nth pool (mod (max 0 n) (count pool))))))
 
+(defn proposal-disposition
+  "What terminal cleanup may safely do with a coding worktree.
+
+  Successful output is never force-deleted: committed work becomes a branch
+  proposal, while an uncommitted patch retains its tree for review."
+  [status dirty? changed?]
+  (cond
+    (and (= :succeeded status) dirty?) :retained-dirty-worktree
+    (and (= :succeeded status) changed?) :preserved-branch
+    (= :succeeded status) :released-no-change
+    :else :released-failure))
+
 ;; ---------------------------------------------------------------------------
 ;; the goal
 ;; ---------------------------------------------------------------------------

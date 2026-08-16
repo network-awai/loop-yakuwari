@@ -45,9 +45,12 @@
  ;; `nexus-x402`).
  :awai.fleet/tie-break :oldest-dispatch
 
+ ;; Only runners with a measured local coding path belong in this pool.
+ ;; Codex uses Tamaki's subscription-backed `codex exec` adapter inside the
+ ;; per-run worktree. Other model providers can return after the same
+ ;; edit+test+proposal qualification has passed.
  :awai.fleet/runners
- [{:runner :claude :weight 3}
-  {:runner :codex :weight 2}]
+ [{:runner :codex :weight 1}]
 
  ;; Ceilings no role may exceed, whatever its own file says. `effective`
  ;; resolution is `yakuwari.policy/strictest-of`, so listing a capability
@@ -92,6 +95,7 @@
  ;; exists and what it costs.
  :awai.fleet/journal
  {:journal/current "journal/current.edn"
+  :journal/proposals "journal/proposals.edn"
   :journal/format :one-edn-map-per-line
   :journal/rollover-at-bytes 4194304}
 

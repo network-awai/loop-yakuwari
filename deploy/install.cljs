@@ -51,6 +51,13 @@
   (or (which "nbb")
       (throw (ex-info "nbb not on PATH — install it before installing agents" {}))))
 
+(def codex-path
+  (or (which "codex")
+      (throw (ex-info "codex not on PATH — a qualified coding runner is required" {}))))
+
+(def workspace-root (path/resolve repo-root "../../.."))
+(def worktree-root (path/join home ".cloud-itonami" "awai-worktrees"))
+
 (defn- sibling-check
   "The classpath reaches ../../kotoba-lang/{yakuwari,yakuwari-view}. If those
   are not checked out the agent will fail every 300 seconds and only the log
@@ -69,6 +76,9 @@
   (-> tpl
       (str/replace "@REPO@" repo-root)
       (str/replace "@NBB@" nbb-path)
+      (str/replace "@CODEX_BIN_DIR@" (path/dirname codex-path))
+      (str/replace "@WORKSPACE@" workspace-root)
+      (str/replace "@WORKTREE_ROOT@" worktree-root)
       (str/replace "@HOME@" home)))
 
 (def labels ["network.awai.yakuwari.tick" "network.awai.yakuwari.publish"])
@@ -76,6 +86,7 @@
 (defn -main []
   (sibling-check)
   (fs/mkdirSync (path/join home ".gftd") #js {:recursive true})
+  (fs/mkdirSync worktree-root #js {:recursive true})
   (doseq [label labels]
     (let [tpl-path (path/join repo-root "deploy" (str label ".plist.template"))
           out (path/join agents-dir (str label ".plist"))

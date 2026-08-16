@@ -20,7 +20,12 @@
        rather than relying on find-root walking up from cwd. -->
   <key>WorkingDirectory</key><string>@REPO@</string>
   <key>EnvironmentVariables</key>
-  <dict><key>AWAI_ROOT</key><string>@REPO@</string></dict>
+  <dict>
+    <key>AWAI_ROOT</key><string>@REPO@</string>
+    <key>AWAI_WORKSPACE</key><string>@WORKSPACE@</string>
+    <key>AWAI_WORKTREE_ROOT</key><string>@WORKTREE_ROOT@</string>
+    <key>PATH</key><string>@CODEX_BIN_DIR@:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
   <key>StartInterval</key><integer>300</integer>
   <key>RunAtLoad</key><true/>
   <key>StandardOutPath</key><string>@HOME@/.gftd/awai-yakuwari-tick.log</string>
