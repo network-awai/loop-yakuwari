@@ -13,7 +13,7 @@
     <string>--classpath</string>
     <string>@REPO@/src:@REPO@/../../kotoba-lang/yakuwari/src:@REPO@/../../kotoba-lang/yakuwari-view/src</string>
     <string>@REPO@/bin/awai.cljs</string>
-    <string>tick</string>
+    <string>dispatch</string>
     <string>--apply</string>
   </array>
   <!-- A LaunchAgent starts with cwd "/", so AWAI_ROOT is set explicitly
