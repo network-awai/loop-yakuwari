@@ -109,7 +109,7 @@
    :business/job-focus
    {:director "Keep product identity, governance and deployment evidence aligned."
     :engineer "Preserve resident reliability and capability confinement across CLI, MCP and UI."
-    :qa "Verify resident, CLI, MCP and browser paths rather than treating unit tests as production proof."
+    :qa "Verify resident, CLI, MCP and browser paths rather than treating unit tests as production proof. Start from docs/endpoint-health-receipt.edn: act on :not-available, and check :mirror-age-minutes before believing a quiet result -- a stale mirror and a healthy fleet look identical (root ADR-2608180100). :unobserved is not :available."
     :financial-chief "Separate measured revenue and provider cost from modeled opportunity."}}
 
   {:business/id :cloud-murakumo
