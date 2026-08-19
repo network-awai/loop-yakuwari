@@ -1,0 +1,206 @@
+;; animeka — アニメ家. Eight works, one steward each.
+;;
+;; The role KIND is the episode slug stem (`hagane` -> /ep-ep-hagane-01), so a
+;; bot name reaches its page without a mapping table. The production status
+;; beside each name was read from animeka.gftd.ai on 2026-08-19: one 放送中,
+;; one 制作中, six 企画. Those WILL move, and a steward that cannot report its
+;; own current stage from the live graph is not doing its job.
+;;
+;; Six of eight are 企画, so most of these objectives are about deciding
+;; whether a work should advance AT ALL. A steward that treats 企画 as a
+;; queue to be drained produces eight half-made works and no finished one.
+;;
+;; シロ & ピコ is here as a WORK. It has been discussed as a standalone
+;; product ("shiropico"); it is an animeka title and gets a work steward,
+;; not a business.
+;;
+;; Every steward is :max 1 — two agents holding one work's continuity is the
+;; failure this decomposition prevents.
+
+[{:yakuwari/id :animeka/work-shiropico
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry シロ & ピコ (制作中) forward.
+   It is IN PRODUCTION (制作中) while six of its siblings are still 企画, so it is
+   the title that decides whether animeka's twelve-stage cut walk survives
+   contact with a real schedule. Report which stage each cut is actually at
+   rather than which stage the plan says; a cut stuck between stages and a
+   cut nobody has started look identical in a progress bar. Its only
+   published episode carries a hash slug (ep-50c8799c) where every sibling
+   carries a readable one — say whether that is deliberate before more
+   episodes inherit it."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "シロ & ピコ"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-hagane
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry 鋼刃学園 (放送中) forward.
+   It is the ONLY title AIRING (放送中), which makes it the one work in animeka
+   with an audience already waiting on a cadence. Adaptation is the binding
+   constraint: it comes from a completed 12-volume manga, so an episode may
+   compress or reorder but must not contradict a source a viewer can go and
+   read. Name the volume range each episode covers."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "鋼刃学園"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-isekai
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry 異世界自販機に転生した俺 (企画) forward.
+   Still 企画. The premise (a salaryman reincarnated as a vending machine,
+   helping others in exchange for coins) is a strong constraint disguised as a
+   gag: a protagonist who cannot move or speak normally has to carry scenes
+   somehow. Settle that before storyboards — a work whose lead cannot act is
+   not a work that reaches production."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "異世界自販機に転生した俺"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-sakura
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry 桜の記憶 (企画) forward.
+   Still 企画. A closing rural high school and a final culture festival is the
+   most conventional premise in the catalog, so state what this one does that
+   the genre does not already do. If the answer is nothing, say so and
+   recommend it stay at 企画 rather than consuming production capacity that
+   シロ&ピコ and 鋼刃学園 are currently using."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "桜の記憶"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-ramen
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry The Last Ramen Master (企画) forward.
+   Still 企画, and the only DOCUMENTARY in a catalog of fiction — a 90-year-old
+   Tokyo ramen master, a 50-year recipe and a succession problem. That makes
+   it the one title whose subject may be a real person: establish whether it
+   is, and if so treat consent, likeness and accuracy as gating conditions
+   rather than production details. Do not proceed on the assumption it is
+   fictional."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "The Last Ramen Master"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-nyacat
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry NyaCat Multiverse (企画) forward.
+   Still 企画. It is built on Nyan Cat, an existing internet meme with an
+   identifiable author, so the first duty is rights, not storyboards:
+   establish what may actually be used and under what terms. A short-form
+   comedy that cannot be published is cheaper to stop now than after
+   animation. Report the answer even when it is 'no'."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "NyaCat Multiverse"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-konbi
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry 異世界コンビニ店長 (企画) forward.
+   Still 企画. It shares an isekai premise with 異世界自販機に転生した俺 in the
+   same catalog, so say plainly what separates them — modern management
+   rebuilding a kingdom's economy is a different story engine from a vending
+   machine, but a viewer meeting both on one 作品一覧 page will not infer that.
+   Two titles indistinguishable at the catalog level compete with each other."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "異世界コンビニ店長"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}
+
+ {:yakuwari/id :animeka/work-toshi
+  :yakuwari/business :animeka
+  :yakuwari/project "cloud-itonami/animeka"
+  :yakuwari/objective
+  "Carry 都市伝説探偵クラブ (企画) forward.
+   Still 企画. Four middle-schoolers chasing urban legends with phones and
+   social media is the catalog's only title aimed at an age group that
+   constrains what may be shown — horror and comedy crossing in a work with
+   minor leads. State the content boundary you are writing to before scripts,
+   not after a scene has to be cut."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "都市伝説探偵クラブ"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}]

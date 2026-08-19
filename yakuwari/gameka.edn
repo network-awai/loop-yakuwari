@@ -1,0 +1,67 @@
+;; gameka — ゲーム家. Two gameSpecs, one steward each.
+;;
+;; MEASURED 2026-08-19: gameka.gftd.ai did not answer (curl exit 000 — no TLS
+;; handshake, not a 4xx/5xx). Both stewards therefore open with restoration.
+;; This is deliberate and owner-decided: a steward that reports on a catalog
+;; nobody can load is reporting on a mirror of its own assumptions.
+;;
+;; The check is one line and neither steward may skip it:
+;;
+;;   curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://gameka.gftd.ai/
+;;
+;; 000 means unreachable. It is NOT the same as a 200 with an empty catalog,
+;; and a steward that reports "no games found" while the host is dark has
+;; produced the exact failure this workspace calls a silent pass.
+
+[{:yakuwari/id :gameka/work-survivors-zombie
+  :yakuwari/business :gameka
+  :yakuwari/project "cloud-itonami/gameka"
+  :yakuwari/objective
+  "Carry the survivors-zombie gameSpec forward — the baseline spec that
+   survivors-zombie-mall varies from, which makes a change here a change to
+   both. FIRST: establish whether gameka.gftd.ai answers at all, and if it
+   does not, make restoring it the bounded outcome and report the measured
+   status code rather than describing the catalog from the repo. Once it
+   answers, balance and runtime-knob changes are proposals with the arithmetic
+   shown, never edits justified by feel."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "survivors-zombie"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "Restoring the host is a production deploy. Propose it; a person lands it."}]}
+
+ {:yakuwari/id :gameka/work-survivors-zombie-mall
+  :yakuwari/business :gameka
+  :yakuwari/project "cloud-itonami/gameka"
+  :yakuwari/objective
+  "Carry the survivors-zombie-mall gameSpec forward — shopping-mall siege,
+   scored 830/1000 by its own critic pass (fun 820 / balance 770 / theme 910 /
+   coop 800 / feasibility 960) at generation time. Balance is its weakest
+   measured axis, so that is where evidence is owed. FIRST: establish whether
+   gameka.gftd.ai answers; report the measured status code and treat 000 as
+   unreachable, not as an empty catalog. It shares survivors-runtime with the
+   baseline spec, so state whether a proposed change is mall-only or touches
+   both — a runtime change presented as a mall change is how the sibling spec
+   breaks without anyone editing it."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "survivors-zombie-mall"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}]}]

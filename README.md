@@ -1,11 +1,11 @@
 # loop-yakuwari
 
-The operating roles of awai network's eight startup businesses — what each role is for,
+The operating roles of awai network's businesses — what each role is for,
 what it may do alone, and which one gets the next slot.
 
 ```
 fleet.edn                 global WIP, runner pool, weights, capability ceiling
-businesses.edn            the eight businesses, their role sets, and what they LACK
+businesses.edn            every business, its role set, and what it LACKS
 workforce.edn             shared job/cadence/capability templates
 yakuwari/<business>.edn   authored business-specific roles (templates fill declared gaps)
 src/awai/registry.cljc    cross-file agreement + the fleet ceiling
@@ -35,7 +35,11 @@ owns which role goes next, and the data saying what the roles are.
 Design: superproject **ADR-2607300800**. The bounded Cloud Itonami sales
 mailbox design is [ADR-0001](docs/adr/0001-j-cloud-itonami-sales-mailbox.md).
 
-## The eight businesses
+## The businesses
+
+Two kinds, and they decompose differently.
+
+### The eight startup businesses — decomposed by ROLE
 
 | business | roles | deliberately absent |
 |---|---|---|
@@ -47,6 +51,37 @@ mailbox design is [ADR-0001](docs/adr/0001-j-cloud-itonami-sales-mailbox.md).
 | `nexus-x402` | 8 | designer — comes from `x402-directory` |
 | `cloud-itonami` | 9 | — |
 | `cloud-murakumo` | 9 | — |
+
+### The five creative -ka — decomposed by WORK
+
+One steward per 作品, and no operating roles at all. Two titles in one catalog
+share a pipeline but not an audience, a cadence or a reason to exist, so a
+single "mangaka engineer" would have to hold five unrelated editorial states
+at once — the thing `Act only inside this business` exists to prevent.
+
+| business | stewards | unit | measured 2026-08-19 |
+|---|---|---|---|
+| `mangaka` | 5 | title | 36 installments live at `mangaka.itonami.cloud` |
+| `animeka` | 8 | work | 1 放送中, 1 制作中, 6 企画 at `animeka.gftd.ai` |
+| `gameka` | 2 | gameSpec | **host did not answer** (curl exit 000) |
+| `dougaka` | 1 | the catalog itself | **host did not answer**; no published works |
+| `yukkuri` | 4 | channel | 4 channels hold 123 series |
+
+The role KIND is the published slug stem (`yamainu` → `/work/yamainu-12`), so
+a bot name reaches its page without a mapping table.
+
+**The unit is chosen, not inherited.** mangaka gets a steward per TITLE rather
+than per installment, and yukkuri per CHANNEL rather than per series —
+otherwise the bot count tracks chapter count and grows without a decision
+(123 series would be 123 bots). `dougaka` gets ONE steward because it has no
+published works; its five internal examples are renderer fixtures, and a
+steward each would make this fleet report five works the public cannot reach.
+
+**Two hosts are dark.** `gameka.gftd.ai` and `dougaka.gftd.ai` returned curl
+exit 000 on 2026-08-19 — no TLS handshake, which is not the same as a 200
+serving an empty catalog. Those stewards carry restoration as their first
+bounded outcome and are told to report the measured status code, because a
+steward reporting "no works found" against a dark host is a silent pass.
 
 **Absence is declared, not implied.** `yakuwari.spec` refuses a role with no
 objective, because a role nobody can state the purpose of is not reviewable.
