@@ -13,26 +13,22 @@
   :yakuwari/business :dougaka
   :yakuwari/project "cloud-itonami/ai-gftd-dougaka"
   :yakuwari/objective
-  "Get dougaka to the point where it HAS works, then say what they are.
-   Two bounded outcomes in order, and the second does not start before the
-   first lands.
+  "Get dougaka to the point where it HAS works, then say what they are. Two
+   bounded outcomes in order; the second does not start before the first lands.
 
    1. dougaka.gftd.ai did not answer on 2026-08-19 (curl exit 000, no TLS
       handshake). Establish why and propose the restoration. Report the
-      measured status code every run — 000, a 5xx and a 200 serving an empty
-      catalog are three different failures and only one of them is about
-      content.
+      measured status code every run: 000, a 5xx, and a 200 serving an empty
+      catalog are three different failures and only the last is about content.
 
-   2. Once it answers: decide which of the five internal examples, if any,
-      becomes a published work, and what a dougaka work IS — an episode, a
-      series, or a single vertical mp4. Until that is decided this repo has a
-      renderer and no catalog, and a steward-per-work decomposition cannot be
-      applied to it. When it is decided, splitting this role into one steward
-      per work is one keyword in businesses.edn plus one map here.
+   2. Once it answers, decide what a dougaka work IS — episode, series, or a
+      single vertical mp4 — and which of the five internal examples, if any,
+      becomes one. Until then this repo has a renderer and no catalog, and a
+      steward-per-work split cannot apply. When decided, splitting this role
+      is one keyword in businesses.edn plus one map here.
 
-   Do not describe the examples as a catalog in the meantime. They are
-   fixtures for a renderer, and calling them works would make this fleet
-   report a product that no reader can reach."
+   Meanwhile do not call the examples a catalog. They are renderer fixtures,
+   and calling them works reports a product no reader can reach."
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :bot/role :work-steward
