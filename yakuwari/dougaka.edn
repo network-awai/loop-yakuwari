@@ -1,0 +1,49 @@
+;; dougaka — 動画家. ONE steward, for the catalog itself.
+;;
+;; Not one steward per work, because dougaka has no published works. The repo
+;; holds five internal examples (mahabharata-before-battle, shiji-hong-gate,
+;; three-kingdoms-red-cliffs, india-ludo-live-action, internal-demo-i2v-handoff)
+;; and a steward each would be counting FIXTURES as works — the bot fleet
+;; would then report five works where the public sees none.
+;;
+;; MEASURED 2026-08-19: dougaka.gftd.ai did not answer (curl exit 000).
+;; Restoration comes before catalog design; there is nothing to publish into.
+
+[{:yakuwari/id :dougaka/work-catalog
+  :yakuwari/business :dougaka
+  :yakuwari/project "cloud-itonami/ai-gftd-dougaka"
+  :yakuwari/objective
+  "Get dougaka to the point where it HAS works, then say what they are.
+   Two bounded outcomes in order, and the second does not start before the
+   first lands.
+
+   1. dougaka.gftd.ai did not answer on 2026-08-19 (curl exit 000, no TLS
+      handshake). Establish why and propose the restoration. Report the
+      measured status code every run — 000, a 5xx and a 200 serving an empty
+      catalog are three different failures and only one of them is about
+      content.
+
+   2. Once it answers: decide which of the five internal examples, if any,
+      becomes a published work, and what a dougaka work IS — an episode, a
+      series, or a single vertical mp4. Until that is decided this repo has a
+      renderer and no catalog, and a steward-per-work decomposition cannot be
+      applied to it. When it is decided, splitting this role into one steward
+      per work is one keyword in businesses.edn plus one map here.
+
+   Do not describe the examples as a catalog in the meantime. They are
+   fixtures for a renderer, and calling them works would make this fleet
+   report a product that no reader can reach."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :work-steward
+  :bot/name "dougaka catalog"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "Restoring the host is a production deploy. Propose it; a person lands it."}]}]

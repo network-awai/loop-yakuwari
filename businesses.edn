@@ -127,4 +127,89 @@
    {:director "Keep public promises bounded by measured fleet capacity and recovery evidence."
     :engineer "Maintain routing, worker reachability, capacity and actual distributed execution."
     :qa "Test failover, fresh inventory and multi-node execution separately."
-    :financial-chief "Track node, energy and provider costs without treating nominal capacity as sold revenue."}}]}
+    :financial-chief "Track node, energy and provider costs without treating nominal capacity as sold revenue."}}
+
+  ;; ── The five creative -ka ──────────────────────────────────────────────
+  ;;
+  ;; These carry no operating roles. Their roles ARE their works: one
+  ;; steward per 作品, because a manga title and the title beside it share a
+  ;; pipeline but not an audience, a release cadence or a reason to exist.
+  ;; A single "mangaka engineer" would have to hold five unrelated editorial
+  ;; states at once, which is the thing this fleet keeps saying it will not
+  ;; do (`Act only inside this business` in the projected responsibilities).
+  ;;
+  ;; The role KIND is the work slug, so the fleet-wide key stays
+  ;; `<business>/<kind>` and no registry code changes. Each steward is
+  ;; authored under yakuwari/ rather than generated, because
+  ;; `workforce.edn` templates are keyed by operating role and a work has
+  ;; no template to fill it from — see `complete-roles`, which skips a
+  ;; declared kind with no template rather than inventing one.
+  ;;
+  ;; Adding a work is one keyword here plus one authored map under
+  ;; yakuwari/. Retiring one is the same edit reversed; the bot goes with it.
+
+  {:business/id :mangaka
+   :business/name "mangaka"
+   :business/repo "cloud-itonami/mangaka"
+   :business/domain "mangaka.itonami.cloud"
+   :business/what "漫画家 — AI が描いた manga を公開し(reader)、公開済みのページを下絵に人が原稿を組み直す(studio)。作品の原子はページ(空間軸)。"
+   :business/roles [:work-yamainu :work-zankyo :work-halfgram :work-ghostmass :work-ghost-hacker]
+   :business/roles-absent
+   [{:role :director
+     :why "The catalog has no roadmap above the works — what mangaka does next IS what its five titles do next. Add a director if the studio starts making decisions no single title owns."}
+    {:role :engineer
+     :why "The pipeline (reader, studio, comfy) is shared infrastructure a per-title steward must not fork. Engineering it belongs to cloud-itonami, which already carries the role."}
+    {:role :qa
+     :why "A page either reads or it does not, and the steward of that title is the only party who knows which. A separate QA would have to re-derive five editorial contexts to say anything."}]
+   :business/note "5 titles / 36 installments live at mangaka.itonami.cloud as of 2026-08-19: 山犬と硯(yamainu-1..12) 残響のカルテット(zankyo-1..9) 0.5グラムの宇宙(halfgram-1..8) 幽霊の質量(ghostmass-1..5) Ghost Hacker(gh-arc0-*). The role kind is the published slug stem, so a reviewer can go from a bot name to a URL without a mapping table. The steward is per TITLE, not per installment — otherwise the bot count tracks chapter count and grows without a decision."}
+
+  {:business/id :animeka
+   :business/name "animeka"
+   :business/repo "cloud-itonami/animeka"
+   :business/domain "animeka.gftd.ai"
+   :business/what "アニメ家 — anime production as a queryable graph. The creative atom is the cut (a shot, on the time axis), which is what makes it the sibling of mangaka, whose atom is the page. Work → episode → scene → cut, each cut walking twelve production stages."
+   :business/roles [:work-shiropico :work-hagane :work-isekai :work-sakura
+                    :work-ramen :work-nyacat :work-konbi :work-toshi]
+   :business/roles-absent
+   [{:role :director
+     :why "Same reason as mangaka: eight works, eight independent editorial lines, no studio-level decision above them yet."}
+    {:role :engineer
+     :why "The production graph and the twelve-stage walk are shared. A per-work engineer would fork the pipeline eight ways."}]
+   :business/note "8 works live at animeka.gftd.ai as of 2026-08-19. シロ&ピコ is the work formerly discussed as a standalone product 'shiropico' — it is a work inside animeka, not a business, and gets a work steward rather than a business of its own."}
+
+  {:business/id :gameka
+   :business/name "gameka"
+   :business/repo "cloud-itonami/gameka"
+   :business/domain "gameka.gftd.ai"
+   :business/what "ゲーム家 — the business layer of game making: the catalog of gameSpecs, the build that turns one into playable runtime sources, the audio, and the graph server fronting all of it."
+   :business/roles [:work-survivors-zombie :work-survivors-zombie-mall]
+   :business/roles-absent
+   [{:role :director
+     :why "Two specs sharing one runtime is a catalog, not a portfolio. Revisit when a third spec needs a different runtime."}
+    {:role :qa
+     :why "gameka has a playtest surface of its own; a QA role that cannot run it would be reporting on someone else's evidence."}]
+   :business/note "gameka.gftd.ai did NOT answer on 2026-08-19 (curl exit 000, no TLS handshake). Both stewards carry restoration as their first bounded outcome — a steward publishing about a dark host is the failure mode here."}
+
+  {:business/id :dougaka
+   :business/name "dougaka"
+   :business/repo "cloud-itonami/ai-gftd-dougaka"
+   :business/domain "dougaka.gftd.ai"
+   :business/what "動画家 — a Clojure video-production service: an HTTP graph server that turns a timeline into an ffmpeg render plan, plus an offline executor that turns a committed episode plan into a real vertical mp4 and sidecar SRT."
+   :business/roles [:work-catalog]
+   :business/roles-absent
+   [{:role :director
+     :why "There is nothing to direct yet: the host is dark and no work has been published. A director here would be setting direction for an empty catalog."}]
+   :business/note "dougaka.gftd.ai did NOT answer on 2026-08-19 (curl exit 000). The repo holds five internal examples (mahabharata-before-battle, shiji-hong-gate, three-kingdoms-red-cliffs, india-ludo-live-action, internal-demo-i2v-handoff) and no published works. So dougaka gets ONE steward for the catalog itself rather than a steward per example — a bot per unpublished demo would be counting fixtures as works."}
+
+  {:business/id :yukkuri
+   :business/name "yukkuri"
+   :business/repo "cloud-itonami/yukkuri"
+   :business/domain "yukkuri.gftd.ai"
+   :business/what "ゆっくり解説 — four YouTube channels with distinct editorial identities, each holding series and episodes with an L/R cast, kamishibai backgrounds and channel-scoped compliance rules."
+   :business/roles [:channel-cyber :channel-anime :channel-truecrime :channel-pachinko]
+   :business/roles-absent
+   [{:role :director
+     :why "Each channel has its own :channel/topic-scope and compliance boundary, and those boundaries are the editorial decision. A director above them would only be able to say things every channel already says for itself."}
+    {:role :marketer
+     :why "Growth here is per-channel metadata and thumbnail work inside YouTube, which the channel steward does as part of publishing. A separate marketer would have no surface of its own."}]
+   :business/note "The unit is the CHANNEL, not the series: 4 channels hold 123 series as of 2026-08-19, and a steward per series would be 123 bots for a fleet that runs one at a time. Only cyber is described in its own data as mature; the other three carry that asymmetry in their objectives rather than hiding it."}]}
