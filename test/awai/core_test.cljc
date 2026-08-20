@@ -482,7 +482,7 @@
     (testing "what the agent may edit is the isolated tree"
       (is (= "/runs/awai-net-kotobase-engineer-1" (:project r)))
       (is (= "/runs/awai-net-kotobase-engineer-1"
-             (nth (:argv r) (inc (.indexOf (to-array (:argv r)) "--project"))))))
+             (nth (:argv r) (inc (.indexOf (vec (:argv r)) "--project"))))))
     (testing "the shared checkout appears nowhere in what tamaki is told"
       (is (not (some #{"/ws/orgs/network-awai/net-kotobase"} (:argv r)))))
     (testing "the goal is not rebuilt, only the project value is replaced"
@@ -498,3 +498,97 @@
     (is (nil? (:worktree-root (dispatch/config {}))))
     (is (= "/runs" (:worktree-root (dispatch/config
                                     {:awai.fleet/dispatch {:worktree-root "/runs"}}))))))
+
+;; ---------------------------------------------------------------------------
+;; A profile says how a role RUNS, never what it may do
+;; ---------------------------------------------------------------------------
+
+(def profiles
+  {:awai.profiles/profiles
+   {:default {:profile/id :default :profile/provider "murakumo"
+              :profile/model "murakumo-main"}
+    :subscription {:profile/id :subscription :profile/provider "claude-bridge"
+                   :profile/model "claude-sonnet-5"}}
+   :awai.profiles/by-role {}
+   :awai.profiles/by-key {}})
+
+(def a-director
+  ;; :engineer, not :director -- :director is in :outward-roles and would trip
+  ;; outward-without-identity, which has nothing to do with profiles.
+  (role-of :network-isekai/engineer :network-isekai))
+
+(deftest a-role-is-addressed-by-the-name-everything-else-uses
+  ;; `by-key` is "business/kind" -- the string the projection emits as :key and
+  ;; Cloud Itonami stores as :bot/workforce-key. The first version looked up
+  ;; :yakuwari/id instead, so every entry matched nothing and the table sat
+  ;; there doing NOTHING while looking like it worked.
+  (is (= "network-isekai/engineer" (registry/role-key businesses a-director))))
+
+(deftest a-profile-resolves-by-key-then-kind-then-default
+  (testing "with nothing assigned, every role runs the default"
+    (is (= "murakumo" (:profile/provider (registry/profile-for businesses profiles a-director)))))
+  (testing "a kind moves every role of that kind"
+    (is (= "claude-bridge"
+           (:profile/provider
+            (registry/profile-for businesses
+                                  (assoc profiles :awai.profiles/by-role {:engineer :subscription})
+                                  a-director)))))
+  (testing "a key moves one role and beats its kind"
+    (is (= "claude-bridge"
+           (:profile/provider
+            (registry/profile-for businesses
+                                  (assoc profiles :awai.profiles/by-key
+                                         {"network-isekai/engineer" :subscription})
+                                  a-director)))))
+  (testing "no profiles at all is not an error -- it is how it behaved before"
+    (is (nil? (registry/profile-for businesses nil a-director)))))
+
+(deftest a-profile-may-not-carry-authority
+  ;; Authority has exactly one path: :yakuwari/capabilities -> biscuit ->
+  ;; kotoba-lang/authority. An authority-shaped profile key is REFUSED rather
+  ;; than ignored, because ignoring lets someone write :profile/tools and
+  ;; believe it did something.
+  (doseq [k [:profile/tools :profile/capabilities :profile/writes?
+             :profile/omakase? :profile/scopes :profile/peers?]]
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (assoc-in profiles [:awai.profiles/profiles :default k] true)})]
+      (is (false? (:ok? r)) (str k " must be refused"))
+      (is (some #(= :profile-carries-authority (:problem %)) (:problems r))))))
+
+(deftest an-assignment-that-reaches-nothing-is-a-failure-not-a-silence
+  ;; Found by assigning one live and watching NOTHING change. Silence is what
+  ;; let the wrong lookup survive review.
+  (testing "a key in the shape the old code expected now fails"
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (assoc profiles :awai.profiles/by-key {:engineer :subscription})})]
+      (is (false? (:ok? r)))
+      (is (some #(= :profile-key-matches-no-role (:problem %)) (:problems r)))))
+  (testing "a kind no role has"
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (assoc profiles :awai.profiles/by-role {:nobody :subscription})})]
+      (is (some #(= :profile-role-matches-no-role (:problem %)) (:problems r)))))
+  (testing "assigned to a profile that does not exist"
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (assoc profiles :awai.profiles/by-key
+                               {"network-isekai/engineer" :nonexistent})})]
+      (is (some #(= :profile-assignment-names-unknown-profile (:problem %)) (:problems r)))))
+  (testing "a table with no :default, which every role falls back to"
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (update profiles :awai.profiles/profiles dissoc :default)})]
+      (is (some #(= :profiles-without-default (:problem %)) (:problems r)))))
+  (testing "and a correct assignment raises no profile problem at all"
+    ;; Asserted on the profile problems, not on :ok? -- this one-role fixture
+    ;; also reports :business-role-missing for the director the business
+    ;; declares, which has nothing to do with profiles.
+    (let [r (registry/validate-fleet
+             {:fleet fleet :businesses businesses :roles [a-director]
+              :profiles (assoc profiles :awai.profiles/by-key
+                               {"network-isekai/engineer" :subscription})})
+          profile-problems (filter #(str/starts-with? (name (:problem %)) "profile")
+                                   (:problems r))]
+      (is (empty? profile-problems) (pr-str profile-problems)))))
