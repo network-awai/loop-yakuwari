@@ -62,4 +62,47 @@
  :awai.profiles/by-role {}
 
  ;; A single role may override its kind. Empty for the same reason.
- :awai.profiles/by-key {}}
+ :awai.profiles/by-key
+ ;; The 20 authored-work stewards run on the Claude subscription rather than
+ ;; the fleet's own hardware.
+ ;;
+ ;; Not because they are more important -- because they are the roles closest
+ ;; to the thing the fleet has never done. In 670 runs it has produced zero
+ ;; approval cards, zero patches and zero artifacts, and these are the roles
+ ;; that own a published work.
+ ;;
+ ;; It also relieves the murakumo slot, which is the actual failure source:
+ ;; measured 2026-08-20, two thirds of runs failed, uniformly across every
+ ;; role, because all 90 contend for ONE slot at parallel:1. Nothing about
+ ;; that rate is a property of any role.
+ ;;
+ ;; Cost is bounded and stated: 20 roles at 1440-minute cadence is 20 calls a
+ ;; day. The heavier contention is the 24 roles at 360 minutes (96 calls a
+ ;; day); moving those would relieve more and cost more, and that is a
+ ;; separate decision by whoever pays.
+ ;;
+ ;; Listed one per line rather than selected by job, because `by-key` is keyed
+ ;; by the projection's key and each of these has a distinct kind
+ ;; (:work-hagane, :work-isekai, ...). `validate-fleet` refuses any entry that
+ ;; matches no role, so a typo here fails rather than sits silent.
+ {
+  "animeka/work-hagane" :claude-subscription
+  "animeka/work-isekai" :claude-subscription
+  "animeka/work-konbi" :claude-subscription
+  "animeka/work-nyacat" :claude-subscription
+  "animeka/work-ramen" :claude-subscription
+  "animeka/work-sakura" :claude-subscription
+  "animeka/work-shiropico" :claude-subscription
+  "animeka/work-toshi" :claude-subscription
+  "dougaka/work-catalog" :claude-subscription
+  "gameka/work-survivors-zombie" :claude-subscription
+  "gameka/work-survivors-zombie-mall" :claude-subscription
+  "mangaka/work-ghost-hacker" :claude-subscription
+  "mangaka/work-ghostmass" :claude-subscription
+  "mangaka/work-halfgram" :claude-subscription
+  "mangaka/work-yamainu" :claude-subscription
+  "mangaka/work-zankyo" :claude-subscription
+  "yukkuri/channel-anime" :claude-subscription
+  "yukkuri/channel-cyber" :claude-subscription
+  "yukkuri/channel-pachinko" :claude-subscription
+  "yukkuri/channel-truecrime" :claude-subscription}}
