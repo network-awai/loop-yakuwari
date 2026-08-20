@@ -88,10 +88,16 @@
                       (when (:detail s) (str ": " (:detail s)))))))
     (let [fleet (read-edn (at "fleet.edn"))
           businesses (read-edn (at "businesses.edn"))
-          workforce (read-edn (at "workforce.edn"))]
+          workforce (read-edn (at "workforce.edn"))
+          ;; Optional on purpose: a deployment without profiles.edn behaves
+          ;; exactly as it did before one existed, rather than failing to load
+          ;; over a file that only chooses which model answers.
+          profiles (when (fs/existsSync (at "profiles.edn"))
+                     (read-edn (at "profiles.edn")))]
       {:fleet fleet
        :businesses businesses
        :workforce workforce
+       :profiles profiles
        :roles (registry/complete-roles businesses workforce roles)
        :skipped @skipped})))
 
