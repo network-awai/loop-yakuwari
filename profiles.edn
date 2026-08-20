@@ -1,0 +1,65 @@
+;; profiles.edn — how a role RUNS. Never what it may do.
+;;
+;; ## Why this is separate from everything else here
+;;
+;; `businesses.edn` says which roles exist. `yakuwari/` says what each role is
+;; for and what it may do alone. `fleet.edn` bounds how many run at once.
+;; None of them say which model answers, or on whose subscription.
+;;
+;; That was not a gap anyone declared — it was a constant. cloud-itonami-app
+;; wrote `:bot/provider-id "murakumo"` and `:bot/model "murakumo-main"` as
+;; literals at provisioning time, so all 90 Bots were identical because the
+;; provisioner said so, not because anyone chose it. The per-Bot fields
+;; already existed and nothing ever varied them.
+;;
+;; ## A profile carries no authority, and that is enforced
+;;
+;; A profile may name a provider, a model and a cadence. It may NOT name
+;; capabilities, tools, scopes, writes, approvals or accounts. Authority has
+;; one path — loop-yakuwari's `:yakuwari/capabilities`, carried as a biscuit,
+;; decided by `kotoba-lang/authority` — and a second surface that could widen
+;; a Bot's reach is exactly the thing ADR-2608180200 refuses.
+;;
+;; `awai.registry/validate-fleet` rejects an authority-shaped key here rather
+;; than ignoring it: ignoring would let someone write `:profile/tools` and
+;; believe it had an effect.
+;;
+;; ## Today every role resolves to :default
+;;
+;; Landing this changes no Bot's behaviour, deliberately. Which roles should
+;; run somewhere else is a cost decision — `claude` draws on a Claude Code
+;; subscription, `codex` on another — and it belongs to whoever pays, not to
+;; the commit that makes the choice expressible.
+;;
+;; `:yakuwari/runners` has said `:claude` or `:codex` per role for 63 roles
+;; and the fleet has never read it. That is the choice this file makes
+;; sayable; it does not make it.
+
+{:awai.profiles/version 1
+
+ :awai.profiles/profiles
+ {:default
+  {:profile/id :default
+   :profile/provider "murakumo"
+   :profile/model "murakumo-main"
+   :profile/why "The fleet's own inference. One production slot, no external
+                 billing, and the only provider every Bot can use without a
+                 subscription question. What provisioning hardcoded."}
+
+  ;; Declared and unused. Kept because a profile nobody can name is a profile
+  ;; nobody can choose, and the point of this file is that the choice becomes
+  ;; visible rather than buried in a literal.
+  :claude-subscription
+  {:profile/id :claude-subscription
+   :profile/provider "claude-bridge"
+   :profile/model "claude-sonnet-5"
+   :profile/why "Claude Code subscription via the local bridge on 127.0.0.1:9180.
+                 Assigning a role here spends a subscription rather than the
+                 fleet's own hardware, which is why no role is assigned by
+                 this commit."}}
+
+ ;; role kind -> profile. An absent kind resolves to :default.
+ :awai.profiles/by-role {}
+
+ ;; A single role may override its kind. Empty for the same reason.
+ :awai.profiles/by-key {}}

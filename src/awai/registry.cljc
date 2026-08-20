@@ -119,13 +119,39 @@
                    :yakuwari/mailbox (:mailbox outward))))]
     (vec (concat authored generated))))
 
+(def authority-shaped-profile-keys
+  "Keys a profile may never carry.
+
+  A profile says how a role RUNS. Authority has one path -- `:yakuwari/
+  capabilities`, carried as a biscuit, decided by `kotoba-lang/authority` --
+  and a second surface able to widen a Bot's reach is what ADR-2608180200
+  refuses. These are REJECTED rather than ignored: ignoring lets someone write
+  `:profile/tools` and believe it did something."
+  #{:profile/capabilities :profile/tools :profile/scopes :profile/writes?
+    :profile/accounts :profile/approvals :profile/omakase? :profile/browser?
+    :profile/peers?})
+
+(defn profile-for
+  "The profile a role runs under: its own key, else its kind, else `:default`.
+
+  Returns nil when `profiles` is absent, so a deployment without the file
+  behaves exactly as it did before one existed."
+  [profiles role]
+  (when-let [table (:awai.profiles/profiles profiles)]
+    (let [id (:yakuwari/id role)
+          kind (when id (keyword (name id)))
+          chosen (or (get (:awai.profiles/by-key profiles) id)
+                     (get (:awai.profiles/by-role profiles) kind)
+                     :default)]
+      (get table chosen))))
+
 (defn workforce-bots
   "Project effective roles into Cloud Itonami Bot jobs.
 
   The projection carries semantic capability decisions for explanation. It
   is not an execution grant: Cloud Itonami still intersects each entry with
   the Bot's concrete tool/workspace grant."
-  [{:keys [fleet businesses workforce roles]}]
+  [{:keys [fleet businesses workforce roles profiles]}]
   (let [bx (business-index businesses)
         templates (:awai.workforce/templates workforce)]
     {:schema "network.awai.workforce-bots.v1"
@@ -163,6 +189,11 @@
            :cadence-minutes (or (:bot/cadence-minutes role)
                                 (:bot/cadence-minutes template)
                                 1440)
+           ;; How this role runs. Never what it may do -- see
+           ;; `authority-shaped-profile-keys`.
+           :profile (when-let [p (profile-for profiles role)]
+                      (select-keys p [:profile/id :profile/provider :profile/model
+                                      :profile/cadence-minutes]))
            :outward? (boolean (:yakuwari/outward? role))
            :identity (:yakuwari/identity role)
            :mailbox (:yakuwari/mailbox role)}))
@@ -185,14 +216,24 @@
     :identity-without-outward an identity on a role not declared outward
     :non-outward-role-outward a role outside the fleet's outward set claims to be
     :absent-role-present      :roles-absent names a role that actually exists
-    :invalid-spec             yakuwari.spec refused it"
-  [{:keys [fleet businesses roles]}]
+    :invalid-spec             yakuwari.spec refused it
+    :profile-carries-authority a profile named something only the capability
+                              path may name"
+  [{:keys [fleet businesses roles profiles]}]
   (let [bx (business-index businesses)
         outward-kinds (or (:awai.businesses/outward-roles businesses) #{})
         by-id (group-by :yakuwari/id roles)
         problems
         (vec
          (concat
+          ;; A profile says how a role runs. It may not say what it may do:
+          ;; rejected rather than ignored, so a `:profile/tools` that would
+          ;; have done nothing is a failure instead of a false belief.
+          (for [[id p] (:awai.profiles/profiles profiles)
+                k (keys p)
+                :when (contains? authority-shaped-profile-keys k)]
+            {:problem :profile-carries-authority :profile id :key k})
+
           ;; A role id must be unique fleet-wide: reconcile/plan attributes a
           ;; run by matching :agent.run/yakuwari to :yakuwari/id, so two roles
           ;; sharing one id would silently pool each other's executions.
