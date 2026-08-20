@@ -131,16 +131,34 @@
     :profile/accounts :profile/approvals :profile/omakase? :profile/browser?
     :profile/peers?})
 
+(defn role-key
+  "The stable name of a role, `\"business/kind\"` -- the same string the
+  projection emits as `:key` and the same one Cloud Itonami stores as
+  `:bot/workforce-key`. `profiles.edn` addresses roles by THIS, because it is
+  the name that already appears everywhere else."
+  [businesses role]
+  ;; A role may name a business that does not exist -- `validate-fleet` reports
+  ;; that as :role-unknown-business. Falling back to the declared name keeps
+  ;; this total, so the profile checks do not throw before that is reported.
+  (let [b (get (business-index businesses) (:yakuwari/business role))
+        biz (or (:business/id b) (:yakuwari/business role))]
+    (str (when biz (name biz)) "/" (name (:yakuwari/id role)))))
+
 (defn profile-for
   "The profile a role runs under: its own key, else its kind, else `:default`.
 
   Returns nil when `profiles` is absent, so a deployment without the file
-  behaves exactly as it did before one existed."
-  [profiles role]
+  behaves exactly as it did before one existed.
+
+  `by-key` is addressed by `role-key` -- \"animeka/work-hagane\", the string
+  the projection already emits. An earlier version looked up `:yakuwari/id`
+  instead, so every `by-key` entry matched nothing and the table sat there
+  doing NOTHING while looking like it worked. `validate-fleet` now refuses an
+  entry that resolves no role, because silence is what made that survive."
+  [businesses profiles role]
   (when-let [table (:awai.profiles/profiles profiles)]
-    (let [id (:yakuwari/id role)
-          kind (when id (keyword (name id)))
-          chosen (or (get (:awai.profiles/by-key profiles) id)
+    (let [kind (keyword (name (:yakuwari/id role)))
+          chosen (or (get (:awai.profiles/by-key profiles) (role-key businesses role))
                      (get (:awai.profiles/by-role profiles) kind)
                      :default)]
       (get table chosen))))
@@ -191,7 +209,7 @@
                                 1440)
            ;; How this role runs. Never what it may do -- see
            ;; `authority-shaped-profile-keys`.
-           :profile (when-let [p (profile-for profiles role)]
+           :profile (when-let [p (profile-for businesses profiles role)]
                       (select-keys p [:profile/id :profile/provider :profile/model
                                       :profile/cadence-minutes]))
            :outward? (boolean (:yakuwari/outward? role))
@@ -218,7 +236,12 @@
     :absent-role-present      :roles-absent names a role that actually exists
     :invalid-spec             yakuwari.spec refused it
     :profile-carries-authority a profile named something only the capability
-                              path may name"
+                              path may name
+    :profile-key-matches-no-role   an assignment that reaches no role at all
+    :profile-role-matches-no-role  ... by kind
+    :profile-assignment-names-unknown-profile  assigned to a profile that is
+                              not in the table
+    :profiles-without-default a profile table with no :default to fall back to"
   [{:keys [fleet businesses roles profiles]}]
   (let [bx (business-index businesses)
         outward-kinds (or (:awai.businesses/outward-roles businesses) #{})
@@ -233,6 +256,32 @@
                 k (keys p)
                 :when (contains? authority-shaped-profile-keys k)]
             {:problem :profile-carries-authority :profile id :key k})
+
+          ;; A profile assignment that resolves nothing is the failure this
+          ;; file already had once: `by-key` was looked up with the wrong
+          ;; value, so every entry matched no role and the table sat there
+          ;; doing nothing while looking like it worked. Found only by
+          ;; assigning one live and watching NOTHING change. An assignment
+          ;; that reaches no role, or names a profile that does not exist, is
+          ;; now a failure rather than a silence.
+          (let [known (set (map (partial role-key businesses) roles))
+                table (:awai.profiles/profiles profiles)
+                kinds (set (map (comp keyword name :yakuwari/id) roles))]
+            (concat
+             (for [[k id] (:awai.profiles/by-key profiles)
+                   :when (not (contains? known k))]
+               {:problem :profile-key-matches-no-role :key k :profile id
+                :hint "addressed as \"business/kind\" -- the same string the projection emits as :key"})
+             (for [[k id] (:awai.profiles/by-role profiles)
+                   :when (not (contains? kinds k))]
+               {:problem :profile-role-matches-no-role :role k :profile id})
+             (for [[k id] (merge (:awai.profiles/by-key profiles)
+                                 (:awai.profiles/by-role profiles))
+                   :when (not (contains? table id))]
+               {:problem :profile-assignment-names-unknown-profile :assignment k :profile id})
+             (when (and table (not (contains? table :default)))
+               [{:problem :profiles-without-default
+                 :hint "every role falls back to :default; without it a role runs on whatever the app hardcodes"}])))
 
           ;; A role id must be unique fleet-wide: reconcile/plan attributes a
           ;; run by matching :agent.run/yakuwari to :yakuwari/id, so two roles
