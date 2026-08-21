@@ -63,46 +63,23 @@
 
  ;; A single role may override its kind. Empty for the same reason.
  :awai.profiles/by-key
- ;; The 20 authored-work stewards run on the Claude subscription rather than
- ;; the fleet's own hardware.
+ ;; EMPTY, after this assignment broke the roles it was meant to help.
  ;;
- ;; Not because they are more important -- because they are the roles closest
- ;; to the thing the fleet has never done. In 670 runs it has produced zero
- ;; approval cards, zero patches and zero artifacts, and these are the roles
- ;; that own a published work.
+ ;; Measured 2026-08-21 by reading state.edn as EDN rather than by regex: the
+ ;; 20 work stewards ran 20 times and failed 20 times, every one
+ ;; :provider/denied. Not degraded -- zero successes. Meanwhile the 70 roles
+ ;; left on murakumo ran at 57%.
  ;;
- ;; It also relieves the murakumo slot, which is the actual failure source:
- ;; measured 2026-08-20, two thirds of runs failed, uniformly across every
- ;; role, because all 90 contend for ONE slot at parallel:1. Nothing about
- ;; that rate is a property of any role.
+ ;; The cause is not subtle and was in the code the whole time.
+ ;; `policy/select-provider` matches the requested id against the deployment's
+ ;; admitted `:providers`, and the live config admits exactly one: murakumo.
+ ;; A profile can say which provider a role prefers; it cannot admit one.
+ ;; Naming a provider the deployment has not admitted does not fall back --
+ ;; `provider-choice!` throws, by design, because a stored id is "a preference,
+ ;; never a way around review, TLS, credential, or the deployment egress
+ ;; switch".
  ;;
- ;; Cost is bounded and stated: 20 roles at 1440-minute cadence is 20 calls a
- ;; day. The heavier contention is the 24 roles at 360 minutes (96 calls a
- ;; day); moving those would relieve more and cost more, and that is a
- ;; separate decision by whoever pays.
- ;;
- ;; Listed one per line rather than selected by job, because `by-key` is keyed
- ;; by the projection's key and each of these has a distinct kind
- ;; (:work-hagane, :work-isekai, ...). `validate-fleet` refuses any entry that
- ;; matches no role, so a typo here fails rather than sits silent.
- {
-  "animeka/work-hagane" :claude-subscription
-  "animeka/work-isekai" :claude-subscription
-  "animeka/work-konbi" :claude-subscription
-  "animeka/work-nyacat" :claude-subscription
-  "animeka/work-ramen" :claude-subscription
-  "animeka/work-sakura" :claude-subscription
-  "animeka/work-shiropico" :claude-subscription
-  "animeka/work-toshi" :claude-subscription
-  "dougaka/work-catalog" :claude-subscription
-  "gameka/work-survivors-zombie" :claude-subscription
-  "gameka/work-survivors-zombie-mall" :claude-subscription
-  "mangaka/work-ghost-hacker" :claude-subscription
-  "mangaka/work-ghostmass" :claude-subscription
-  "mangaka/work-halfgram" :claude-subscription
-  "mangaka/work-yamainu" :claude-subscription
-  "mangaka/work-zankyo" :claude-subscription
-  "yukkuri/channel-anime" :claude-subscription
-  "yukkuri/channel-cyber" :claude-subscription
-  "yukkuri/channel-pachinko" :claude-subscription
-  "yukkuri/channel-truecrime" :claude-subscription}}
+ ;; Re-assigning these roles requires admitting claude-bridge in the
+ ;; deployment's provider list first. That is an admission-policy change, not a
+ ;; registry one, and it belongs to whoever owns the policy.
+ {}}
