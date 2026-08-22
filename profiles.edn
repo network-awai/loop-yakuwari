@@ -46,6 +46,30 @@
                  billing, and the only provider every Bot can use without a
                  subscription question. What provisioning hardcoded."}
 
+  ;; The Modal-served FastMTP build of the same Qwen3.8 27B, behind the same
+  ;; admitted provider (api.murakumo.cloud), so assigning it admits nothing
+  ;; new -- it is a model id on a provider the deployment already reviewed.
+  ;; Explicit selection by design: the fleet-wide `murakumo-main` alias is
+  ;; untouched (owner, 2026-08-22).
+  ;;
+  ;; Measured 2026-08-22: GET /v1/models lists it; cold start ~17 s (scales
+  ;; to zero after 5 min); 95-99 tok/s warm; completion clamped at 2048 by
+  ;; the gateway whatever max_tokens asks. The resident tick already pairs
+  ;; its token cap with thinking OFF (cloud-itonami-app bots.clj), which is
+  ;; what keeps a 2048 clamp from being "no answer". The same day the
+  ;; murakumo-main alias route answered nothing for 2.5 min on a live tick;
+  ;; this model answered FASTMTP_OK in 19 s. That is the reason for the
+  ;; assignment below, and it is a measurement, not a preference.
+  :murakumo-fastmtp-aggressive
+  {:profile/id :murakumo-fastmtp-aggressive
+   :profile/provider "murakumo"
+   :profile/model "qwen3.8-27b-fastmtp-aggressive"
+   :profile/why "Modal RTX PRO 6000, Q4_K_P + FastMTP, 32K context. Same admitted
+                 provider as :default; a different model id on it. Chosen for the
+                 dougaka production roles because their tick must write a whole
+                 design file in one answer, and the alias route gave none on
+                 2026-08-22."}
+
   ;; Declared and unused. Kept because a profile nobody can name is a profile
   ;; nobody can choose, and the point of this file is that the choice becomes
   ;; visible rather than buried in a literal.
@@ -82,4 +106,10 @@
  ;; Re-assigning these roles requires admitting claude-bridge in the
  ;; deployment's provider list first. That is an admission-policy change, not a
  ;; registry one, and it belongs to whoever owns the policy.
- {}}
+ ;;
+ ;; The three below are NOT that case: :murakumo-fastmtp-aggressive names the
+ ;; already-admitted "murakumo" provider, so `policy/select-provider` resolves
+ ;; it exactly as :default does. Only the model id differs.
+ {"dougaka/episode-planner" :murakumo-fastmtp-aggressive
+  "dougaka/qa" :murakumo-fastmtp-aggressive
+  "dougaka/work-catalog" :murakumo-fastmtp-aggressive}}
