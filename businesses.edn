@@ -195,11 +195,15 @@
    :business/repo "cloud-itonami/ai-gftd-dougaka"
    :business/domain "dougaka.gftd.ai"
    :business/what "動画家 — a Clojure video-production service: an HTTP graph server that turns a timeline into an ffmpeg render plan, plus an offline executor that turns a committed episode plan into a real vertical mp4 and sidecar SRT."
-   :business/roles [:work-catalog]
+   :business/roles [:episode-planner :qa :work-catalog]
    :business/roles-absent
    [{:role :director
-     :why "There is nothing to direct yet: the host is dark and no work has been published. A director here would be setting direction for an empty catalog."}]
-   :business/note "dougaka.gftd.ai did NOT answer on 2026-08-19 (curl exit 000). The repo holds five internal examples (mahabharata-before-battle, shiji-hong-gate, three-kingdoms-red-cliffs, india-ludo-live-action, internal-demo-i2v-handoff) and no published works. So dougaka gets ONE steward for the catalog itself rather than a steward per example — a bot per unpublished demo would be counting fixtures as works."}
+     :why "There is nothing to direct yet: the host is dark and no work has been published. A director here would be setting direction for an empty catalog."}
+    {:role :marketer
+     :why "Publication is the actor's own announce leg (dougaka.announce → aozora.app/videos) under the nightly loop's :auto-publish grant, gated by the legs verdict. A marketer Bot would be a second publishing path with no verdict in front of it."}
+    {:role :engineer
+     :why "The renderer lives in cloud-itonami/ai-gftd-dougaka and its engineer is the workspace's, not this business's. The Bots here author and check designs; they do not change the pipeline."}]
+   :business/note "Since 2026-08-22 the Bots are the producers: episode-planner turns topics/backlog.edn entries into videos/<slug>.edn designs in ai-gftd-dougaka-actor, qa falsifies them against the DougakaGovernor bounds, and the nightly loop (loop-ka-production :dougaka) renders, grades the legs and announces. dougaka.gftd.ai did NOT answer on 2026-08-19 (curl exit 000); the steward keeps that. No published works yet — the cuts so far graded :degraded because no generation token reached the engine."}
 
   {:business/id :yukkuri
    :business/name "yukkuri"
