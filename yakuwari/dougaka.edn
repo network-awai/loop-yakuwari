@@ -1,15 +1,110 @@
-;; dougaka — 動画家. ONE steward, for the catalog itself.
+;; dougaka — 動画家. Three roles, and the unit they share is the DESIGN FILE.
 ;;
-;; Not one steward per work, because dougaka has no published works. The repo
-;; holds five internal examples (mahabharata-before-battle, shiji-hong-gate,
-;; three-kingdoms-red-cliffs, india-ludo-live-action, internal-demo-i2v-handoff)
-;; and a steward each would be counting FIXTURES as works — the bot fleet
-;; would then report five works where the public sees none.
+;; A dougaka work order is one `videos/<slug>.edn` in
+;; cloud-itonami/ai-gftd-dougaka-actor. The nightly loop
+;; (kotoba-lang/loop-ka-production, channel :dougaka) drains that directory in
+;; running order: each design goes through the DougakaGovernor
+;; (`dougaka.produce --from`), then the engine (cloud-itonami/ai-gftd-dougaka
+;; `dougaka.pipeline`) which writes a vertical mp4 + SRT + `legs.edn`, and the
+;; loop grades the legs before anything is announced. Nothing in this chain
+;; needs a person except the approval card on the planner's commit and the
+;; :content.publish voice on the steward.
 ;;
-;; MEASURED 2026-08-19: dougaka.gftd.ai did not answer (curl exit 000).
-;; Restoration comes before catalog design; there is nothing to publish into.
+;; So the Bots are the producers, and the split follows the three verbs a
+;; topic passes through:
+;;
+;;   episode-planner  topic  -> design file       (patch.create, autonomous)
+;;   qa               design -> governor bounds   (release.block, autonomous)
+;;   work-catalog     host + what a "work" is     (unchanged from 2026-08-19)
+;;
+;; Why not one steward per work: there are still no PUBLISHED works. The ten
+;; designs in videos/ are work orders, and the rendered cuts so far graded
+;; :degraded (placeholder images, no bed) because no generation token reached
+;; the engine — so a bot per design would again count unpublished fixtures.
+;;
+;; MEASURED 2026-08-22: the chain ran end to end on videos/neko-no-michi.edn
+;; from a clean worktree — 60.04 s, 720x1280, h264/aac, 8 shots, legs.edn
+;; {:video [:placeholder ×8] :voice [:local ×8] :bed false}; loop-ka `record`
+;; graded it DEGRADED and returned exit 10 (hold). That is the loop doing its
+;; job, and it is also the gap the planner cannot close: a design is only as
+;; good as the legs the fleet can run for it.
+;;
+;; dougaka.gftd.ai was still dark on 2026-08-19 (curl exit 000). The steward
+;; keeps restoration as its first bounded outcome; the planner and qa do not
+;; wait on it — the publish surface is aozora.app/videos, not that host.
 
-[{:yakuwari/id :dougaka/work-catalog
+[{:yakuwari/id :dougaka/episode-planner
+  :yakuwari/business :dougaka
+  :yakuwari/project "cloud-itonami/ai-gftd-dougaka-actor"
+  :yakuwari/objective
+  "Turn ONE open topic into ONE design file the nightly loop can render.
+
+   Read exactly two files: `topics/backlog.edn` (the backlog; pick the first
+   entry whose :status is :open) and `topics/README.md` (the design schema
+   and one complete example). Then write `videos/<slug>.edn` in that exact
+   tx-data shape — a one-element vector holding a map with :db/id -1 and the
+   :video/ namespaced keys, :video/scenes stored as a pr-str'd string — and
+   commit it together with the topic's :status flipped to :designed and
+   :design set to the slug. One topic, one file, one commit per tick.
+
+   Design inside the governor's bounds or the loop will hold it: total
+   duration 45–90 s (hard ceiling 120), at most 24 shots, no shot over 10 s,
+   every :prompt a vertical 9:16 live-action description, no real person's
+   likeness, no brand, no third-party character. Subtitles are the narration;
+   one short Japanese line per shot.
+
+   If backlog.edn has no :open entry, do nothing and say so — do not invent a
+   topic. If the file is missing, report that as the finding. The commit is
+   a held write: it lands when approved, and you do not approve it."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :episode-planner
+  :bot/name "dougaka 企画"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :patch.create :decision :autonomous
+    :note "A design file is a patch. Writing it is the job."}
+   {:capability :patch.integrate :decision :approval-required
+    :note "The commit is a held write; a person (or the steward's omakase, if ever set) lands it."}
+   {:capability :content.publish :decision :blocked
+    :note "The planner never announces. Publication is the actor's own announce leg under the loop's grant."}
+   {:capability :spend.commit :decision :blocked}]}
+
+ {:yakuwari/id :dougaka/qa
+  :yakuwari/business :dougaka
+  :yakuwari/project "cloud-itonami/ai-gftd-dougaka-actor"
+  :yakuwari/objective
+  "Try to falsify that the next design the loop will render is inside the
+   DougakaGovernor's bounds, before the loop spends a night on it.
+
+   Read `topics/backlog.edn` to find the most recently :designed slug, then
+   read that `videos/<slug>.edn`. Check, and report each as a measured
+   yes/no: total shot duration ≤ 120 s and inside 45–90; shots ≤ 24; every
+   shot ≤ 10 s; every prompt is a vertical 9:16 live-action description;
+   no real-person likeness, brand, or third-party character in any prompt or
+   subtitle; :video/scenes parses as EDN. A failed check is a release block:
+   record the smallest counterexample (the shot :seq and the field) and
+   flip that topic back to :status :open with a :qa-note so the planner
+   redoes it. A design with no failures is reported as clean — do not edit
+   it. Do not grade craft; grade bounds."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :qa
+  :bot/name "dougaka 検品"
+  :bot/cadence-minutes 1440
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :release.block :decision :autonomous
+    :note "Flipping a topic back to :open is the block; it is a held write like any other."}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :content.publish :decision :blocked}
+   {:capability :deploy.production :decision :blocked}]}
+
+ {:yakuwari/id :dougaka/work-catalog
   :yakuwari/business :dougaka
   :yakuwari/project "cloud-itonami/ai-gftd-dougaka"
   :yakuwari/objective
@@ -21,11 +116,13 @@
       measured status code every run: 000, a 5xx, and a 200 serving an empty
       catalog are three different failures and only the last is about content.
 
-   2. Once it answers, decide what a dougaka work IS — episode, series, or a
-      single vertical mp4 — and which of the five internal examples, if any,
-      becomes one. Until then this repo has a renderer and no catalog, and a
-      steward-per-work split cannot apply. When decided, splitting this role
-      is one keyword in businesses.edn plus one map here.
+   2. Once it answers, decide what a dougaka work IS. Since 2026-08-22 the
+      production unit is settled upstream of you: one `videos/<slug>.edn`
+      design in ai-gftd-dougaka-actor, rendered by the nightly loop, graded
+      by its legs. A WORK is a design whose cut graded :clean and was
+      announced. Count those — if the answer is zero, say zero — and say
+      which, if any, of the five internal examples in this repo should
+      become one.
 
    Meanwhile do not call the examples a catalog. They are renderer fixtures,
    and calling them works reports a product no reader can reach."
