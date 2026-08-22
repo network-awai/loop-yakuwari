@@ -119,6 +119,12 @@
                    :yakuwari/mailbox (:mailbox outward))))]
     (vec (concat authored generated))))
 
+(def max-objective-chars
+  "Cloud Itonami's `bot/max-responsibility` (cloud-itonami-app bot.cljc). The
+  projection puts the objective verbatim into :responsibilities, so an
+  objective over this is refused at provisioning — for every role at once."
+  1000)
+
 (def authority-shaped-profile-keys
   "Keys a profile may never carry.
 
@@ -235,6 +241,11 @@
     :non-outward-role-outward a role outside the fleet's outward set claims to be
     :absent-role-present      :roles-absent names a role that actually exists
     :invalid-spec             yakuwari.spec refused it
+    :objective-over-consumer-limit  an objective longer than the Bot
+                              projection's consumer accepts (Cloud Itonami
+                              bounds each responsibility at 1000 chars and
+                              refuses the WHOLE provision, so one long
+                              objective stalls every Bot's registry update)
     :profile-carries-authority a profile named something only the capability
                               path may name
     :profile-key-matches-no-role   an assignment that reaches no role at all
@@ -288,6 +299,18 @@
           ;; sharing one id would silently pool each other's executions.
           (for [[id rs] by-id :when (> (count rs) 1)]
             {:problem :duplicate-role-id :role/id id :count (count rs)})
+
+          ;; Measured 2026-08-22: a 1,154-character objective passed `check`
+          ;; and then `itonami bots provision` refused the entire 92-role
+          ;; catalog with ":bot/responsibility is longer than 1000
+          ;; characters". The limit is the consumer's, but the registry is
+          ;; where the author is, so the registry says it first.
+          (for [r roles
+                :let [n (count (str (:yakuwari/objective r)))]
+                :when (> n max-objective-chars)]
+            {:problem :objective-over-consumer-limit :role/id (:yakuwari/id r)
+             :chars n :limit max-objective-chars
+             :hint "point at a file in the role's project for the long version"})
 
           (mapcat (fn [r]
                     (let [id (:yakuwari/id r)

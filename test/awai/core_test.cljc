@@ -128,6 +128,22 @@
               (:problems (check [(role-of :network-isekai/director :network-isekai)
                                  (role-of :network-isekai/director :network-isekai)]))))))
 
+(deftest an-objective-the-bot-projection-cannot-carry-is-caught
+  (testing "Cloud Itonami bounds each responsibility at 1000 chars and refuses the whole provision"
+    (let [long-one (apply str (repeat (inc registry/max-objective-chars) "x"))
+          r (check [(role-of :network-isekai/engineer :network-isekai
+                             :yakuwari/objective long-one)])]
+      (is (some #(and (= :objective-over-consumer-limit (:problem %))
+                      (= :network-isekai/engineer (:role/id %))
+                      (= (inc registry/max-objective-chars) (:chars %)))
+                (:problems r))
+          (pr-str (:problems r))))
+    (let [exact (apply str (repeat registry/max-objective-chars "x"))]
+      (is (not (some #(= :objective-over-consumer-limit (:problem %))
+                     (:problems (check [(role-of :network-isekai/engineer :network-isekai
+                                                 :yakuwari/objective exact)]))))
+          "the limit itself is allowed; it is the consumer's <= check"))))
+
 (deftest an-outward-role-with-no-identity-or-mailbox-is-caught
   (let [ps (:problems (check [(role-of :network-isekai/director :network-isekai
                                        :yakuwari/outward? true)]))]

@@ -39,23 +39,22 @@
   :yakuwari/objective
   "Turn ONE open topic into ONE design file the nightly loop can render.
 
-   Read exactly two files: `topics/backlog.edn` (the backlog; pick the first
-   entry whose :status is :open) and `topics/README.md` (the design schema
-   and one complete example). Then write `videos/<slug>.edn` in that exact
-   tx-data shape — a one-element vector holding a map with :db/id -1 and the
-   :video/ namespaced keys, :video/scenes stored as a pr-str'd string — and
-   commit it together with the topic's :status flipped to :designed and
-   :design set to the slug. One topic, one file, one commit per tick.
+   Read exactly two files: `topics/backlog.edn` (take the first entry whose
+   :status is :open) and `topics/README.md` (the exact design shape, the
+   bounds table, the per-tick steps). Write `videos/<slug>.edn`
+   in that shape — tx-data: a one-element vector, :db/id -1, :video/ keys,
+   :video/scenes as a pr-str'd string — and in the same commit flip the
+   entry to :status :designed :design \"<slug>\". One topic, one file, one
+   commit per tick.
 
-   Design inside the governor's bounds or the loop will hold it: total
-   duration 45–90 s (hard ceiling 120), at most 24 shots, no shot over 10 s,
-   every :prompt a vertical 9:16 live-action description, no real person's
-   likeness, no brand, no third-party character. Subtitles are the narration;
-   one short Japanese line per shot.
+   Stay inside the bounds table in that README or the loop holds it: shot
+   durations sum to exactly 60, at most 24 shots, no shot over 10 s, every
+   :prompt a vertical 9:16 live-action description, no real person, brand,
+   or third-party character. Subtitles are the narration, one Japanese line
+   per shot.
 
-   If backlog.edn has no :open entry, do nothing and say so — do not invent a
-   topic. If the file is missing, report that as the finding. The commit is
-   a held write: it lands when approved, and you do not approve it."
+   No :open entry — do nothing and say so; never invent a topic. The commit
+   is a held write: it lands when approved; you do not approve it."
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :bot/role :episode-planner
@@ -116,16 +115,15 @@
       measured status code every run: 000, a 5xx, and a 200 serving an empty
       catalog are three different failures and only the last is about content.
 
-   2. Once it answers, decide what a dougaka work IS. Since 2026-08-22 the
-      production unit is settled upstream of you: one `videos/<slug>.edn`
-      design in ai-gftd-dougaka-actor, rendered by the nightly loop, graded
-      by its legs. A WORK is a design whose cut graded :clean and was
-      announced. Count those — if the answer is zero, say zero — and say
-      which, if any, of the five internal examples in this repo should
-      become one.
+   2. Once it answers, say what the works are. Since 2026-08-22 the unit is
+      settled upstream: one `videos/<slug>.edn` design in
+      ai-gftd-dougaka-actor, rendered nightly, graded by its legs. A WORK is
+      a design whose cut graded :clean and was announced. Count those — if
+      zero, say zero — and say which of this repo's five internal examples,
+      if any, should become one.
 
-   Meanwhile do not call the examples a catalog. They are renderer fixtures,
-   and calling them works reports a product no reader can reach."
+   Do not call the examples a catalog: they are renderer fixtures, and
+   calling them works reports a product no reader can reach."
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :bot/role :work-steward
