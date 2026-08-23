@@ -1,0 +1,188 @@
+;; etzhayyim — the Tamaki actors, projected as Cloud Itonami Bots.
+;;
+;; Each role here IS a Tamaki ActorSpec (`orgs/etzhayyim/tamaki/actors/*.edn`),
+;; said in this registry's spelling so that Cloud Itonami can provision it as
+;; a resident workforce Bot in the etzhayyim organization. `:tamaki/actor`
+;; names the ActorSpec it mirrors and `test/awai/etzhayyim_parity_test.cljc`
+;; holds the two in agreement: a role whose objective drifts from its actor
+;; without saying why is a failure, not a silence.
+;;
+;; ## What changes when a Tamaki actor runs as a Bot
+;;
+;; Nothing about WHAT it may do. Tamaki's `:actor/hil-policy` is carried here
+;; as `:yakuwari/capabilities`, and Cloud Itonami narrows that again to its
+;; concrete grant (one admitted repository, every write held for approval).
+;; What changes is HOW it runs: Tamaki's supervisor spawns a subscription CLI
+;; (codex / claude / grok) in a detached worktree; the Bot projection runs on
+;; the fleet's own inference under the profile assigned in `profiles.edn`,
+;; one bounded step per cadence, with the conversation, approval cards and
+;; SLO score every other workforce Bot has.
+;;
+;; Measured 2026-08-23 before writing this file: the supervisor's claude /
+;; claude-zai / grok runners hand `"grok:"` and `"claude-zai:"` to
+;; `kotoba-code`'s JVM main, which only understands OpenRouter ids and
+;; `murakumo:` — 715 such invocations in the event log, none of them a
+;; model call. Only the codex runner executes. So "also runs as a Bot" is not
+;; a second runtime beside a working first one for those runners; for them it
+;; is the first.
+;;
+;; ## What is deliberately NOT projected
+;;
+;; `:tamaki/family-representative` (runner `:deterministic`) and
+;; `:tamaki/storage-curator` (deletes allowlisted storage) are not roles a
+;; model should fill; see `:business/roles-absent` in businesses.edn.
+;; `actors/revenue-targets.edn` is a KPI threshold file, not an actor.
+;;
+;; `:yakuwari/runners` mirrors the ActorSpec for the reconcile plane and is,
+;; as for every role here, unread by the Bot projection (profiles.edn).
+
+[{:yakuwari/id :etzhayyim/revenue-growth-supervisor
+  :yakuwari/business :etzhayyim
+  :yakuwari/project "etzhayyim/tamaki"
+  :tamaki/actor :revenue/growth-supervisor
+  :tamaki/spec "actors/revenue-growth.edn"
+  :yakuwari/objective
+  "Increase sustainable revenue by resolving the highest-leverage unblocked issue across governed business actors."
+  :yakuwari/scale {:min 1 :desired 2 :max 8}
+  :yakuwari/runners [{:runner :codex :weight 3}
+                     {:runner :claude :weight 2}
+                     {:runner :claude-zai :weight 2}
+                     {:runner :grok :weight 1}]
+  :bot/role :supervisor
+  :bot/name "Revenue growth supervisor"
+  :bot/cadence-minutes 720
+  ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
+  ;;                    :integrate :voice-required :external-effect :voice-required}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :voice-required}
+   {:capability :content.publish :decision :voice-required
+    :note "Tamaki's :external-effect. Anything that leaves the estate waits for a voice."}
+   {:capability :deploy.production :decision :voice-required}]}
+
+ {:yakuwari/id :etzhayyim/loop-gardener
+  :yakuwari/business :etzhayyim
+  :yakuwari/project "etzhayyim/tamaki"
+  :tamaki/actor :tamaki/loop-gardener
+  :tamaki/spec "actors/loop-gardener.edn"
+  :yakuwari/objective
+  "Evaluate agent loops from durable issue, source, review, integration, failure, cost, and KPI outputs. Propose continue, redirect, throttle, prune, heal, or escalate. Never modify source or stop a loop directly."
+  :yakuwari/scale {:min 1 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :evaluator
+  :bot/name "Loop gardener"
+  :bot/cadence-minutes 720
+  ;; :actor/hil-policy {:observe :autonomous :recommend :autonomous
+  ;;                    :issue-create :approval-required :change-authority :blocked
+  ;;                    :loop-stop :voice-required}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :approval-required}
+   {:capability :patch.create :decision :blocked
+    :note "The actor's own objective: never modify source."}
+   {:capability :patch.integrate :decision :blocked}
+   {:capability :deploy.production :decision :blocked}]}
+
+ {:yakuwari/id :etzhayyim/result-evaluator
+  :yakuwari/business :etzhayyim
+  :yakuwari/project "etzhayyim/tamaki"
+  :tamaki/actor :result/evidence-evaluator
+  :tamaki/spec "actors/result-evaluator.edn"
+  :tamaki/objective-differs
+  "The ActorSpec's objective is a Tamaki runtime procedure: it names the `run_clojure` tool, a `.tamaki/result-evaluation.edn` write and a literal DONE sentinel. A Bot has none of those. The judgement the actor makes is restated below without the procedure."
+  :yakuwari/objective
+  "Evaluate exactly one supervisor-selected integrated result using only the bounded evidence supplied with it. Do not enumerate or scan the complete event store. Missing evidence makes the corresponding hard gate false and confidence lower; never invent it. Integration is not measured impact: unknown production impact stays low-confidence until evidence-bearing seven-day or thirty-day validation exists. Record the evaluation as a proposal; never edit tracked source."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}
+                     {:runner :claude :weight 1}]
+  :bot/role :evaluator
+  :bot/name "Result evaluator"
+  :bot/cadence-minutes 720
+  ;; :actor/hil-policy {:evaluate :autonomous :tournament :autonomous
+  ;;                    :production-validation :approval-required
+  ;;                    :change-authority :blocked}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :blocked}
+   {:capability :patch.integrate :decision :blocked}
+   {:capability :deploy.production :decision :approval-required
+    :note "Tamaki's :production-validation: a validation that touches production is a production act."}]}
+
+ {:yakuwari/id :etzhayyim/radicle-github-bridge
+  :yakuwari/business :etzhayyim
+  :yakuwari/project "etzhayyim/tamaki"
+  :tamaki/actor :bridge/radicle-github
+  :tamaki/spec "actors/radicle-github-bridge.edn"
+  :yakuwari/objective
+  "Keep GitHub CI and review evidence aligned with Radicle-primary evolution candidates without granting GitHub promotion authority."
+  :yakuwari/scale {:min 0 :desired 0 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :bridge
+  :bot/name "Radicle-GitHub bridge"
+  :bot/cadence-minutes 1440
+  ;; :actor/hil-policy {:mirror-pr-create :autonomous :ci-observe :autonomous
+  ;;                    :promote :voice-required :change-authority :blocked}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous
+    :note "A mirror PR is a proposal on the GitHub side; promotion stays with Radicle."}
+   {:capability :patch.integrate :decision :voice-required}
+   {:capability :deploy.production :decision :blocked}]}
+
+ {:yakuwari/id :etzhayyim/toshokan-maturity-curator
+  :yakuwari/business :etzhayyim
+  :yakuwari/project "kotoba-lang/toshokan"
+  :tamaki/actor :toshokan/maturity-curator
+  :tamaki/spec "actors/toshokan-maturity.edn"
+  :yakuwari/objective
+  "Walk the Toshokan issue topology from unblocked corpus and fulltext work toward measurable, queryable bibliographic maturity."
+  :yakuwari/scale {:min 1 :desired 1 :max 4}
+  :yakuwari/runners [{:runner :codex :weight 3}
+                     {:runner :claude :weight 2}
+                     {:runner :claude-zai :weight 2}
+                     {:runner :grok :weight 1}]
+  :bot/role :curator
+  :bot/name "Toshokan maturity curator"
+  :bot/cadence-minutes 720
+  ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
+  ;;                    :integrate :voice-required :external-effect :voice-required}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :voice-required}
+   {:capability :content.publish :decision :voice-required}
+   {:capability :deploy.production :decision :voice-required}]}
+
+ {:yakuwari/id :etzhayyim/yabai-phishing-watch-curator
+  :yakuwari/business :etzhayyim
+  ;; The ActorSpec still says `orgs/etzhayyim/com-etzhayyim-yabai`, a path west
+  ;; no longer carries: the repository is registered as `cloud-itonami/yabai`
+  ;; (manifest/west.yml). The Tamaki supervisor cannot check that actor out;
+  ;; this projection points at where the code is.
+  :yakuwari/project "cloud-itonami/yabai"
+  :tamaki/actor :yabai/phishing-watch-curator
+  :tamaki/spec "actors/yabai-phishing-watch.edn"
+  :yakuwari/objective
+  "Widen what the worldwide CT watch can actually see — brand roster coverage, CT log shards,\n  shared-infra accuracy — without ever loosening the calibration that keeps benign domains\n  unclaimed."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :codex :weight 3}
+                     {:runner :claude :weight 2}
+                     {:runner :grok :weight 1}]
+  :bot/role :curator
+  :bot/name "Yabai phishing-watch curator"
+  :bot/cadence-minutes 720
+  ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
+  ;;                    :integrate :voice-required :external-effect :voice-required}
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :voice-required}
+   {:capability :content.publish :decision :voice-required
+    :note "Abuse reports leave the estate and name third parties: never autonomous (the ActorSpec's own comment)."}
+   {:capability :deploy.production :decision :voice-required}]}]

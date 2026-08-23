@@ -1,4 +1,4 @@
-;; The eight startup businesses and the role set each one needs.
+;; The startup businesses (eight founding, five creative -ka, and etzhayyim) and the role set each one needs.
 ;;
 ;; MEMBERSHIP, not activity — `fleet.edn` governs how many may run at once.
 ;;
@@ -216,4 +216,28 @@
      :why "Each channel has its own :channel/topic-scope and compliance boundary, and those boundaries are the editorial decision. A director above them would only be able to say things every channel already says for itself."}
     {:role :marketer
      :why "Growth here is per-channel metadata and thumbnail work inside YouTube, which the channel steward does as part of publishing. A separate marketer would have no surface of its own."}]
-   :business/note "The unit is the CHANNEL, not the series: 4 channels hold 123 series as of 2026-08-19, and a steward per series would be 123 bots for a fleet that runs one at a time. Only cyber is described in its own data as mature; the other three carry that asymmetry in their objectives rather than hiding it."}]}
+   :business/note "The unit is the CHANNEL, not the series: 4 channels hold 123 series as of 2026-08-19, and a steward per series would be 123 bots for a fleet that runs one at a time. Only cyber is described in its own data as mature; the other three carry that asymmetry in their objectives rather than hiding it."}
+
+  ;; The Tamaki actors, as Bots. Unlike every business above, this one NAMES
+  ;; ITS ORGANIZATION: Cloud Itonami provisions it only into the tenant whose
+  ;; slug is `etzhayyim`, and never into the personal tenant the other 13 land
+  ;; in. A business with no :business/organization keeps today's behaviour.
+  {:business/id :etzhayyim
+   :business/name "etzhayyim"
+   :business/organization "etzhayyim"
+   :business/repo "etzhayyim/tamaki"
+   :business/domain "etzhayyim.com"
+   :business/what "The Tamaki artificial-organism stack and the repositories its actors curate. Each role is a Tamaki ActorSpec (orgs/etzhayyim/tamaki/actors/*.edn) projected as a resident Cloud Itonami Bot: same objective, same HIL policy as capabilities, the fleet's inference under a profile instead of a subscription CLI in a detached worktree."
+   :business/roles [:revenue-growth-supervisor :loop-gardener :result-evaluator
+                    :radicle-github-bridge :toshokan-maturity-curator
+                    :yabai-phishing-watch-curator]
+   :business/roles-absent
+   [{:role :family-representative
+     :why "Its only runner is :deterministic — `tamaki family sync` reconciles the repository inventory without a model, and the supervisor repeats it every 300 s. A Bot would be a model asked to do arithmetic a script already does."}
+    {:role :storage-curator
+     :why "It deletes allowlisted recreatable content and drops DataLad annex content after remote verification. Deletion is not a proposal a Bot can hold for approval one step at a time; it stays with the deterministic homeostasis lane."}
+    {:role :director
+     :why "Tamaki has no director above its actors by design (ADR-0001: an Actor is a durable role with an objective and policy; coordination is through reviewed artifacts). The revenue-growth supervisor is the nearest thing and it is a role here."}
+    {:role :sales
+     :why "Nothing in the etzhayyim estate is sold to a named prospect."}]
+   :business/note "Projected 2026-08-23. The ActorSpecs stay the source of truth for Tamaki's own supervisor; yakuwari/etzhayyim.edn mirrors them and test/awai/etzhayyim_parity_test.cljc fails when a mirrored objective drifts without a stated reason. yabai's ActorSpec names a checkout path west no longer carries (orgs/etzhayyim/com-etzhayyim-yabai → cloud-itonami/yabai); the projection points at the registered path."}]}

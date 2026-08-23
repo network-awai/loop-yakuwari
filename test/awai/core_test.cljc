@@ -218,6 +218,28 @@
     (is (nil? (:tools projected))
         "semantic capability policy must not become a Cloud Itonami tool grant")))
 
+(deftest workforce-projection-names-the-business-organization-when-declared
+  ;; A business may name the tenant it belongs to. One that does not is nil
+  ;; on the wire -- not absent -- so a consumer reading the key on an older
+  ;; projection sees the same shape as on this one.
+  (let [businesses {:awai.businesses/businesses
+                    [{:business/id :x :business/name "X" :business/domain "x.test"
+                      :business/repo "network-awai/x" :business/what "does x"
+                      :business/roles [:qa]}
+                     {:business/id :e :business/name "E" :business/domain "e.test"
+                      :business/organization "etzhayyim"
+                      :business/repo "etzhayyim/e" :business/what "does e"
+                      :business/roles [:qa]}]}
+        workforce {:awai.workforce/templates
+                   {:qa {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 60}}}
+        result (registry/workforce-bots
+                {:fleet fleet :businesses businesses :workforce workforce
+                 :roles [(role-of :x/qa :x) (role-of :e/qa :e)]})
+        by-key (into {} (map (juxt :key identity)) (:roles result))]
+    (is (contains? (get-in by-key ["x/qa" :business]) :organization))
+    (is (nil? (get-in by-key ["x/qa" :business :organization])))
+    (is (= "etzhayyim" (get-in by-key ["e/qa" :business :organization])))))
+
 ;; ---------------------------------------------------------------------------
 ;; The loop
 ;; ---------------------------------------------------------------------------

@@ -70,6 +70,31 @@
                  design file in one answer, and the alias route gave none on
                  2026-08-22."}
 
+  ;; The Tamaki actors, run as Bots (businesses.edn :etzhayyim). Tamaki's own
+  ;; ActorSpecs prefer codex / claude / claude-zai / grok -- subscription CLIs
+  ;; the supervisor spawns in a detached worktree -- and none of those is a
+  ;; provider this deployment admits (the :claude-subscription entry below
+  ;; records what happens when a role names one: 20/20 :provider/denied). So
+  ;; the projection runs on the fleet's own inference, same provider and
+  ;; model as :default, declared under its own name so that moving all six
+  ;; actors to a different model is one line here rather than six role edits
+  ;; -- and so that `itonami bots list` shows WHY these six run where they run.
+  ;;
+  ;; Measured 2026-08-23 (tamaki events.edn): of the four runners the
+  ;; ActorSpecs name, only codex actually executes; "claude-zai:" and "grok:"
+  ;; are handed to kotoba-code's JVM main, which does not know them -- 715
+  ;; invocations, none a model call. For those runners this profile is not a
+  ;; second runtime beside a working first one.
+  :tamaki-resident
+  {:profile/id :tamaki-resident
+   :profile/provider "murakumo"
+   :profile/model "murakumo-main"
+   :profile/why "Tamaki actors projected as resident Bots. The ActorSpec runners
+                 (codex / claude / grok) are subscription CLIs, not admitted
+                 providers; the Bot runs on the fleet's inference. Repoint here
+                 when claude-bridge is admitted, or when a measured reason says
+                 the FastMTP build suits a one-step supervisor tick better."}
+
   ;; Declared and unused. Kept because a profile nobody can name is a profile
   ;; nobody can choose, and the point of this file is that the choice becomes
   ;; visible rather than buried in a literal.
@@ -112,4 +137,12 @@
  ;; it exactly as :default does. Only the model id differs.
  {"dougaka/episode-planner" :murakumo-fastmtp-aggressive
   "dougaka/qa" :murakumo-fastmtp-aggressive
-  "dougaka/work-catalog" :murakumo-fastmtp-aggressive}}
+  "dougaka/work-catalog" :murakumo-fastmtp-aggressive
+  ;; The six Tamaki actors. Same provider and model as :default today; the
+  ;; assignment exists so the choice is named, not inherited.
+  "etzhayyim/revenue-growth-supervisor" :tamaki-resident
+  "etzhayyim/loop-gardener" :tamaki-resident
+  "etzhayyim/result-evaluator" :tamaki-resident
+  "etzhayyim/radicle-github-bridge" :tamaki-resident
+  "etzhayyim/toshokan-maturity-curator" :tamaki-resident
+  "etzhayyim/yabai-phishing-watch-curator" :tamaki-resident}}

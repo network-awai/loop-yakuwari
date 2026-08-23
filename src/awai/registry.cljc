@@ -197,7 +197,14 @@
                       :name (:business/name business)
                       :domain (:business/domain business)
                       :repo (:business/repo business)
-                      :what (:business/what business)}
+                      :what (:business/what business)
+                      ;; The tenant this business belongs to, by slug. nil for
+                      ;; the thirteen that predate the key: Cloud Itonami
+                      ;; provisions those into whichever personal tenant asks,
+                      ;; and a business that names an organization ONLY into
+                      ;; that organization's tenant. See businesses.edn
+                      ;; :etzhayyim for why the key exists.
+                      :organization (:business/organization business)}
            :role {:id kind
                   :job (or (:bot/role role) (:bot/role template) kind)
                   :name (or (:bot/name role) (:bot/name template)
