@@ -70,6 +70,32 @@ at once — the thing `Act only inside this business` exists to prevent.
 The role KIND is the published slug stem (`yamainu` → `/work/yamainu-12`), so
 a bot name reaches its page without a mapping table.
 
+### etzhayyim — the Tamaki actors, decomposed by ACTOR
+
+One role per Tamaki ActorSpec (`orgs/etzhayyim/tamaki/actors/*.edn`), and the
+first business that **names its organization** (`:business/organization
+"etzhayyim"`). Cloud Itonami provisions a business with that key only into the
+tenant whose slug matches; the thirteen above, which carry no key, keep landing
+in whichever personal tenant provisions them.
+
+| role | ActorSpec | admitted repo | cadence |
+|---|---|---|---|
+| `revenue-growth-supervisor` | `:revenue/growth-supervisor` | `etzhayyim/tamaki` | 720 min |
+| `loop-gardener` | `:tamaki/loop-gardener` | `etzhayyim/tamaki` | 720 |
+| `result-evaluator` | `:result/evidence-evaluator` | `etzhayyim/tamaki` | 720 (objective restated — says why) |
+| `radicle-github-bridge` | `:bridge/radicle-github` | `etzhayyim/tamaki` | 1440 |
+| `toshokan-maturity-curator` | `:toshokan/maturity-curator` | `kotoba-lang/toshokan` | 720 |
+| `yabai-phishing-watch-curator` | `:yabai/phishing-watch-curator` | `cloud-itonami/yabai` (ActorSpec still names a retired path) | 720 |
+
+Declined, with reasons in `businesses.edn`: `family-representative` (runner is
+`:deterministic`) and `storage-curator` (deletes). The objective is copied
+**verbatim** from the ActorSpec, and `test/awai/etzhayyim_parity_test.cljc`
+fails when a copy drifts without a `:tamaki/objective-differs` reason, when an
+actor is neither projected nor declined, or when the Tamaki checkout cannot be
+found at all (not found is a failure, not a skip). All six run under the
+`:tamaki-resident` profile — same provider and model as `:default`, named so
+that the choice is visible and movable in one line.
+
 **The unit is chosen, not inherited.** mangaka gets a steward per TITLE rather
 than per installment, and yukkuri per CHANNEL rather than per series —
 otherwise the bot count tracks chapter count and grows without a decision
@@ -139,7 +165,7 @@ Current state:
 
 ```
 $ nbb bin/awai.cljs check
-businesses 8 | roles 70 | outward 21 | narrowed by ceiling 0
+businesses 14 | roles 98 | outward 21 | narrowed by ceiling 4
 check: OK
 ```
 
@@ -222,10 +248,14 @@ says why.
 ## Test
 
 ```sh
-npm test    # nbb; needs sibling kotoba-lang/yakuwari
+npm test    # nbb; needs sibling kotoba-lang/yakuwari and the superproject (or AWAI_WORKSPACE)
 ```
 
-29 tests, 52 assertions.
+56 tests, 181 assertions (measured 2026-08-23). The entry point is
+`test/run_tests.cljs`; until 2026-08-23 `npm test` read the return value of
+`clojure.test/run-tests`, which on nbb is nil, so it exited 0 on every failure.
+The runner now takes the summary from `report` and exits 1 on a failure, 2 when
+no test ran at all.
 
 ## Status
 
