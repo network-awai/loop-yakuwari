@@ -1,0 +1,45 @@
+;; Cloud Itonami's product runtime is cloud-itonami-app.  The business record
+;; remains network-awai/cloud-itonami, but an Engineer or QA Bot asked to repair
+;; the desktop/runtime cannot do that from the business/meta repository.  These
+;; two authored roles narrow their filesystem authority to the implementation
+;; repository; every other Cloud Itonami role keeps the generated business
+;; workspace.
+
+[{:yakuwari/id :cloud-itonami/engineer
+  :yakuwari/business :cloud-itonami
+  :yakuwari/project "cloud-itonami/cloud-itonami-app"
+  :yakuwari/objective
+  "Preserve Cloud Itonami resident reliability and capability confinement
+   across the desktop UI, CLI and MCP. Reproduce the highest current runtime
+   blocker in cloud-itonami-app, then deliver or propose the smallest verified
+   repair without widening a Bot's authority."
+  :yakuwari/scale {:min 0 :desired 1 :max 3
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}}
+  :yakuwari/runners [{:runner :codex :weight 2}
+                     {:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}
+   {:capability :incident.respond :decision :autonomous}]}
+
+ {:yakuwari/id :cloud-itonami/qa
+  :yakuwari/business :cloud-itonami
+  :yakuwari/project "cloud-itonami/cloud-itonami-app"
+  :yakuwari/objective
+  "Try to falsify Cloud Itonami desktop, resident, CLI and MCP release claims
+   from the cloud-itonami-app repository. Reproduce capability-admission drift
+   independently, record the smallest counterexample, and block promotion when
+   offered tools are neither runnable nor explicitly governed."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:blocker-count 1}}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :release.block :decision :autonomous}
+   {:capability :deploy.production :decision :blocked}]}]
