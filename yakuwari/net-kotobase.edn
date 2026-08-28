@@ -13,7 +13,7 @@
 
 [{:yakuwari/id :net-kotobase/director
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Decide what the service commits to next, and keep the three plans'
    promises consistent with what the runbook can actually deliver. A plan
@@ -37,7 +37,7 @@
 
  {:yakuwari/id :net-kotobase/engineer
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Keep pins durable and queries correct. A pin is a named commit CID that
    was promised to stay retrievable, so losing one is a broken promise rather
@@ -60,7 +60,7 @@
 
  {:yakuwari/id :net-kotobase/sales
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Convert a named engineering organisation onto Secure Managed or
    Enterprise. Bounded to named organisations: the P2P plan needs no selling
@@ -82,7 +82,7 @@
 
  {:yakuwari/id :net-kotobase/marketer
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Make the service legible to engineers evaluating a graph database. Every
    published benchmark or availability figure must be one the runbook and the
@@ -100,7 +100,7 @@
 
  {:yakuwari/id :net-kotobase/supporter
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Answer operators and triage incidents against the alpha operational
    objectives and incident thresholds the service-level document defines.
@@ -133,7 +133,7 @@
  ;; with a governance label on it.
  {:yakuwari/id :net-kotobase/kaizen-analyst
   :yakuwari/business :net-kotobase
-  :yakuwari/project "network-awai/net-kotobase"
+  :yakuwari/project "net-kotobase/control-plane"
   :yakuwari/objective
   "Read what this site's own 回遊 measurement says and turn the single most
    answerable question into one proposal per round. Never a remedy: the
