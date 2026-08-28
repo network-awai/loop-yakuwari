@@ -65,7 +65,7 @@
 
   {:business/id :net-kotobase
    :business/name "net kotobase"
-   :business/repo "network-awai/net-kotobase"
+   :business/repo "net-kotobase/control-plane"
    :business/domain "kotobase.net"
    :business/what "Content-addressed knowledge-graph BaaS, pinning and hosting. Three plans separated by who carries operational responsibility: P2P, Secure Managed (99.9% SLA with credits), Enterprise (99.999%, by contract)."
    :business/roles [:director :product-manager :engineer :qa :sales :marketer :supporter :financial-chief :kaizen-analyst]
