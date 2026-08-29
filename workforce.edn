@@ -3,10 +3,27 @@
 ;; shared job policy has one reviewable source while every objective still
 ;; names its business and product-specific focus.
 
+;; CADENCE IS A CEILING, NOT A PROMISE (owner directive 2026-08-29: every role
+;; to 15 minutes).
+;;
+;; What was measured that day, after the Ornith edge route was repaired:
+;; resident runs took p50 174s (min 55s, p90/max 3721s), and the app runs
+;; `[:bots :workforce :max-active] 2`. Two slots at 174s is about 993 runs a
+;; day. 126 Bots asking every 15 minutes is 12,096 -- roughly twelve times the
+;; capacity, so the scheduler, not this number, decides the real interval
+;; (~3 hours at max-active 2).
+;;
+;; Raising max-active does not reach 15 minutes either: the fleet has nine
+;; single-slot Ornith nodes, so nine concurrent runs is about 4,469 a day, or
+;; ~40 minutes per Bot. Fifteen minutes is below the floor this hardware has.
+;;
+;; So read this field as "as often as the fleet allows", and read the real
+;; interval off `resident-job.next-run-at`, never off this table.
+
 {:awai.workforce/version 1
  :awai.workforce/templates
  {:director
-  {:bot/role :business-owner :bot/name "Business Owner" :bot/cadence-minutes 1440
+  {:bot/role :business-owner :bot/name "Business Owner" :bot/cadence-minutes 15
    :yakuwari/objective "Choose the next bounded outcome and reconcile product, customer, operational and financial evidence."
    :yakuwari/scale {:min 0 :desired 1 :max 1}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -19,7 +36,7 @@
     {:capability :spend.commit :decision :approval-required}]}
 
   :product-manager
-  {:bot/role :product-manager :bot/name "Product Manager" :bot/cadence-minutes 720
+  {:bot/role :product-manager :bot/name "Product Manager" :bot/cadence-minutes 15
    :yakuwari/objective "Turn observed user and operator needs into one testable increment with acceptance evidence and named non-goals."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -31,7 +48,7 @@
     {:capability :release.accept :decision :approval-required}]}
 
   :engineer
-  {:bot/role :engineer :bot/name "Engineer" :bot/cadence-minutes 360
+  {:bot/role :engineer :bot/name "Engineer" :bot/cadence-minutes 15
    :yakuwari/objective "Deliver or propose the smallest verified engineering change that removes the highest current technical blocker."
    :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 2 :blocker-count 1}}
    :yakuwari/runners [{:runner :codex :weight 2} {:runner :claude :weight 1}]
@@ -44,7 +61,7 @@
     {:capability :incident.respond :decision :autonomous}]}
 
   :qa
-  {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 360
+  {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 15
    :yakuwari/objective "Try to falsify the release claim with reproducible tests, record the smallest counterexample, and block promotion when evidence is missing."
    :yakuwari/scale {:min 0 :desired 1 :max 2 :scale-up-on {:blocker-count 1}}
    :yakuwari/runners [{:runner :codex :weight 1}]
@@ -57,7 +74,7 @@
     {:capability :deploy.production :decision :blocked}]}
 
   :designer
-  {:bot/role :designer :bot/name "Product Designer" :bot/cadence-minutes 720
+  {:bot/role :designer :bot/name "Product Designer" :bot/cadence-minutes 15
    :yakuwari/objective "Own the human-facing interaction and make the critical journey understandable, accessible and verifiable."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -68,7 +85,7 @@
     {:capability :patch.integrate :decision :approval-required}]}
 
   :sales
-  {:bot/role :sales :bot/name "Sales" :bot/cadence-minutes 720
+  {:bot/role :sales :bot/name "Sales" :bot/cadence-minutes 15
    :yakuwari/objective "Move one named, qualified prospect toward a truthful buying decision; never create an open-ended outbound audience."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -81,7 +98,7 @@
     {:capability :pricing.change :decision :blocked}]}
 
   :marketer
-  {:bot/role :marketer :bot/name "Marketer" :bot/cadence-minutes 720
+  {:bot/role :marketer :bot/name "Marketer" :bot/cadence-minutes 15
    :yakuwari/objective "Make the product findable and legible using claims that point to current product or measured evidence."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -92,7 +109,7 @@
     {:capability :spend.commit :decision :approval-required}]}
 
   :supporter
-  {:bot/role :supporter :bot/name "Customer Support" :bot/cadence-minutes 360
+  {:bot/role :supporter :bot/name "Customer Support" :bot/cadence-minutes 15
    :yakuwari/objective "Answer current users, turn recurring questions into fixes or documentation, and escalate product-impacting failures."
    :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 3 :blocker-count 1}}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -105,7 +122,7 @@
     {:capability :subject.erase :decision :autonomous}]}
 
   :financial-chief
-  {:bot/role :financial-chief :bot/name "Financial Chief" :bot/cadence-minutes 1440
+  {:bot/role :financial-chief :bot/name "Financial Chief" :bot/cadence-minutes 15
    :yakuwari/objective "Keep revenue, cost, runway and pricing assumptions explicit, separating measured facts from forecasts and never moving or trading funds."
    :yakuwari/scale {:min 0 :desired 1 :max 1}
    :yakuwari/runners [{:runner :claude :weight 1}]
