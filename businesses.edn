@@ -240,4 +240,189 @@
      :why "Tamaki has no director above its actors by design (ADR-0001: an Actor is a durable role with an objective and policy; coordination is through reviewed artifacts). The revenue-growth supervisor is the nearest thing and it is a role here."}
     {:role :sales
      :why "Nothing in the etzhayyim estate is sold to a named prospect."}]
-   :business/note "Projected 2026-08-23. The ActorSpecs stay the source of truth for Tamaki's own supervisor; yakuwari/etzhayyim.edn mirrors them and test/awai/etzhayyim_parity_test.cljc fails when a mirrored objective drifts without a stated reason. yabai's ActorSpec names a checkout path west no longer carries (orgs/etzhayyim/com-etzhayyim-yabai → cloud-itonami/yabai); the projection points at the registered path."}]}
+   :business/note "Projected 2026-08-23. The ActorSpecs stay the source of truth for Tamaki's own supervisor; yakuwari/etzhayyim.edn mirrors them and test/awai/etzhayyim_parity_test.cljc fails when a mirrored objective drifts without a stated reason. yabai's ActorSpec names a checkout path west no longer carries (orgs/etzhayyim/com-etzhayyim-yabai → cloud-itonami/yabai); the projection points at the registered path."}
+
+  {:business/id :sumai
+   :business/name "itonami 住まい"
+   :business/repo "cloud-itonami/cloud-itonami-isic-6810"
+   :business/what "不動産取引と賃貸・管理の営み。JSIC 68 不動産取引業と 69 不動産賃貸業・管理業が census で測られた分類で、cloud-itonami-isic-6810 / 6820 の 2 repo が実装を持つ。リクルートの SUUMO と同じ面。"
+   :business/note "world/jsic/68 と 69。市場規模の claim は wiki.kotobase.net の keizai-census corpus が分類に対して持つ（vertical に対してではない）。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :chuko-sha
+   :business/name "itonami 中古車"
+   :business/repo "cloud-itonami/cloud-itonami-isic-4510"
+   :business/what "自動車小売の営み。census が測ったのは JSIC 591 自動車小売業で、新車・中古車・部品を含む分類。中古車だけの数字ではない。カーセンサーと同じ面。"
+   :business/note "world/jsic/591。census は 億円 単位で公表しており、百万円へ換算した数字は文書に無い。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :inshoku
+   :business/name "itonami 飲食"
+   :business/repo "cloud-itonami/cloud-itonami-isic-5610"
+   :business/what "飲食店の営み。JSIC 76 飲食店が census の分類。ホットペッパーグルメと同じ面。"
+   :business/note "world/jsic/76。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :shigoto
+   :business/name "itonami 仕事"
+   :business/repo "cloud-itonami/cloud-itonami-isic-7810"
+   :business/what "職業紹介と労働者派遣の営み。JSIC 91 が census の分類で、isic-7810 / 7820 / 7830 の 3 repo が実装を持つ。Indeed / リクナビと同じ面。求人広告収入は分類に含まれない。"
+   :business/note "world/jsic/91。単発シフトの突合は root の 70-tools/spotwork が別に持つ。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :biyo
+   :business/name "itonami 美容"
+   :business/repo "cloud-itonami/cloud-itonami-isic-9602"
+   :business/what "理容・美容の営み。census の分類は JSIC 78 洗濯・理容・美容・浴場業で、洗濯業と浴場業を含む。ホットペッパービューティーと同じ面。"
+   :business/note "world/jsic/78。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :tabi
+   :business/name "itonami 旅"
+   :business/repo "cloud-itonami/cloud-itonami-isic-5510"
+   :business/what "宿泊と旅行手配の営み。JSIC 75 宿泊業が census の分類で、isic-5510 / 7911 の 2 repo が実装を持つ。じゃらんと同じ面。"
+   :business/note "world/jsic/75。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :manabi
+   :business/name "itonami 学び"
+   :business/repo "cloud-itonami/cloud-itonami-isic-8542"
+   :business/what "学習支援の営み。census の分類は JSIC 82 その他の教育，学習支援業で、学校教育は含まない。isic-8542 / 8549 の 2 repo が実装を持つ。スタディサプリと同じ面。"
+   :business/note "world/jsic/82。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :kekkon
+   :business/name "itonami 結婚"
+   :business/repo "cloud-itonami/cloud-itonami-isic-9609"
+   :business/what "結婚式場の営み。JSIC 79B 結婚式場業が census の分類。ゼクシィと同じ面。"
+   :business/note "world/jsic/79B。 2026-08-29 時点で live host は無い（surface 索引 0 件）。順位の出所は root の manifest/recruit-equivalent-verticals.edn（ADR-2608290100）。"
+   :business/roles [:director :product-manager :engineer :qa]
+   :business/roles-absent
+   [{:role :sales
+     :why "売る製品がまだ無い。live host は surface 索引に 1 件も無く、名前の付いた見込み客も居ない。公開面が立ってから足す。"}
+    {:role :marketer
+     :why "宣伝する公開面が無い。ここで marketer を置くと、存在しない面について書く仕事になる。"}
+    {:role :supporter
+     :why "利用者が居ない。support は届いた問いに答える役で、問いの無いうちは名前だけになる。"}
+    {:role :financial-chief
+     :why "収入も支出も無い。measured revenue と provider cost を分ける仕事に、分ける対象が無い。"}
+    {:role :designer
+     :why "出荷した UI が無い。blueprint と実装は在るが描く面がまだ無いので、UI が立つ時に足す。"}]
+   :business/job-focus
+   {:director "この vertical を次にどの一歩で建てるかを決める。市場規模の順位は既に registry が持っているので、順位を作り直さない。"
+    :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
+    :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
+    :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+]}
