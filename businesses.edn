@@ -49,9 +49,9 @@
    :business/repo "network-awai/club-shinshi"
    :business/domain "shinshi.club"
    :business/what "Membership club. Operated by JK Inc. (BVI); shared contracts, legal and operations live in the root repo while the app and its two actor modules are siblings."
-   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief :kaizen-analyst]
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief :kaizen-analyst :cast-member :producer]
    :business/roles-absent []
-   :business/note "The only business carrying all six, plus the kaizen-analyst added 2026-08-08 when shinshi.club got a 回遊 read face. Membership is sold to named people, so sales is a real function rather than a funnel."}
+   :business/note "The only business carrying all six, plus the kaizen-analyst added 2026-08-08 when shinshi.club got a 回遊 read face. Membership is sold to named people, so sales is a real function rather than a funnel. cast-member and producer added 2026-08-29 (root ADR-2608291800): the cast bots speak AS the product's 12 original-series flagship characters, and the producer grows the catalog through the deterministic char-factory — both custom kinds authored under yakuwari/ like the mangaka works, because workforce.edn has no template for a character."}
 
   {:business/id :net-babiniku
    :business/name "net babiniku"

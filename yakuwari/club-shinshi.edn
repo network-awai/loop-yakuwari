@@ -149,4 +149,49 @@
    {:capability :issue.triage :decision :autonomous}
    {:capability :patch.create :decision :approval-required
     :note "An issue here is a question. Turning it into a change is another role's work, and doing both would let a guess about cause become a patch."}]}
+
+ ;; cast-member / producer — 2026-08-29, root ADR-2608291800. The cast bots
+ ;; are the product speaking as itself: one bot per original series, each
+ ;; bound to that series' flagship character (roster derived from live D1
+ ;; every round, never enumerated). The only publish path is the
+ ;; deterministic pipeline in com-junkawasaki/root scripts/shinshi-cast-bots/
+ ;; — verified D1 writes to shinshi.club, per-character did:key attempts to
+ ;; aozora.app (BLOCKED until the Biscuit migration, ADR-2608291500). These
+ ;; are custom kinds authored here, like the mangaka works: workforce.edn
+ ;; has no template for a character.
+ {:yakuwari/id :club-shinshi/cast-member
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi-app"
+  :yakuwari/objective
+  "Speak as one original-series flagship character: run the posting round
+   (compose in character, land a verified post on shinshi.club, attempt
+   aozora.app under her own did:key) and keep her feed alive. Fiction only
+   — no real-world claims and no invented metrics; the deterministic
+   scripts are the only publish path, so a round that could not verify its
+   write reports that instead of success."
+  :yakuwari/scale {:min 0 :desired 12 :max 12}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :autonomous
+    :note "Publishes only through the product's own cast feed — self-labelled fiction on shinshi.club and the character's own aozora account — never as outward corporate correspondence, which stays with marketer (:voice-required)."}]}
+
+ {:yakuwari/id :club-shinshi/producer
+  :yakuwari/business :club-shinshi
+  :yakuwari/project "network-awai/club-shinshi-app"
+  :yakuwari/objective
+  "Grow the cast: mint new ORIGINAL characters from the deterministic
+   official factory (char-factory), land actress/profile/debut rows with
+   counted verification, and leave image/video fill to the existing
+   pipelines (char-images, catalog-video loop). Never a real person, never
+   an IP character, never a character invented outside the factory's
+   deterministic sequence — a producer that improvises casting is exactly
+   the failure the factory exists to prevent."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :autonomous
+    :note "Debut records for newly minted characters, written and counted back by produce.cljs."}
+   {:capability :issue.create :decision :autonomous}]}
 ]
