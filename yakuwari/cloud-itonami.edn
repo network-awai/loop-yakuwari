@@ -83,4 +83,40 @@
    {:capability :domain.proposal.create :decision :autonomous
     :note "Creates an internal proposal only; registration, renewal billing and DNS mutation still require Passkey."}
    {:capability :domain.approved-proposal.commit :decision :autonomous
-    :note "The host refuses commit unless authority.api records human Passkey approval for this exact proposal."}]}]
+    :note "The host refuses commit unless authority.api records human Passkey approval for this exact proposal."}]}
+
+ ;; Measured 2026-08-30 across 4,696 checkouts under orgs/: zero interrupted
+ ;; merges or rebases, six repositories holding stashes, 791 live linked
+ ;; worktrees, and 80 worktree registrations in 65 repositories whose working
+ ;; tree had already been deleted. The last row is the only one a fixed verb
+ ;; can finish, and it is the one nothing was reading -- `ls` does not show a
+ ;; registration whose directory is gone, and `git status` in one checkout
+ ;; says nothing about the other four thousand.
+ ;;
+ ;; Cadence 60 rather than the shared 15: stale registrations accumulate over
+ ;; days, and the run takes a resident slot even though it crosses no model
+ ;; provider. Read it as a ceiling like every other cadence here.
+ {:yakuwari/id :cloud-itonami/git-maintainer
+  :yakuwari/business :cloud-itonami
+  :yakuwari/project "cloud-itonami/cloud-itonami-app"
+  :yakuwari/objective
+  "Keep git bookkeeping across the west workspace from accumulating. Read
+   hygiene across every west-registered checkout, then prune ONLY the
+   registrations of working trees that are already gone. Report interrupted
+   merges and rebases, stashes, and anything left unpruned as findings for the
+   human runbook (manifest/cleanup-workflow.edn) and do not attempt to resolve
+   them: resolving a conflict is a judgement about content, and retiring a
+   stash or a branch requires archiving, push and a server-side merge that
+   this identity has neither the network nor the credential for. Never drop a
+   stash, delete a branch, discard uncommitted work, rebase, force, or push.
+   Never override a locked worktree: git's refusal to prune one is what
+   protects a working tree on removable media."
+  :yakuwari/scale {:min 1 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :bot/role :operations
+  :bot/name "Git Maintainer"
+  :bot/cadence-minutes 60
+  :yakuwari/capabilities
+  [{:capability :git.inspect :decision :autonomous}
+   {:capability :git.cleanup :decision :autonomous
+    :note "Only `git worktree prune`, and only in checkouts whose stale registrations were re-measured at call time. No path, no shell, no push."}]}]
