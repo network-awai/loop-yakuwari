@@ -488,4 +488,36 @@
     "Deliver one end-to-end slice at a time: accepted Kotoba source, Amu lowering, deterministic JavaScript or ESM artifact, and real Node or browser execution without a JVM, nbb, or a ClojureScript compiler at runtime. Keep capabilities deny-by-default and preserve typed-value, fuel, overflow, module-graph, and export gates."
     :qa
     "Try to falsify KotobaScript with real generated artifacts. Compare the same supported program across the current Amu reference path and Node/browser execution, including values, stdout, errors, exit status, deterministic bytes, capability denial, and source locations. Unsupported ClojureScript semantics are explicit gaps, never silent compatibility."}}
+
+  {:business/id :cloud-itonami-numbering
+   :business/name "Cloud Itonami Numbering"
+   :business/repo "cloud-itonami/cloud-itonami-numbering"
+   :business/what
+   "Agent と Bot に専用電話番号を割り当てる Telnyx ベースの番号サービス。番号検索、見積、注文、割当、ルーティング、状態確認、解放を一つの監査可能な面にまとめ、AgentMail の電話番号版として提供する。"
+   :business/note
+   "2026-08-30 に最小サービスを実装。Telnyx の実 credential、実番号購入、live endpoint は未接続。番号の注文・解約と継続課金は Bot が実行せず、Passkey owner consent、quote 上限、規制 bundle、別名義 operator の全てを通った時だけ外部作用になる。"
+   :business/roles [:director :product-manager :engineer :qa :sales :supporter
+                    :financial-chief :regulatory-guard]
+   :business/roles-absent
+   [{:role :designer
+     :why "独立した顧客向け UI はまだ無い。現時点の面は API と Cloud Itonami 統合なので、実装と利用経路が立ってから designer を足す。"}
+    {:role :marketer
+     :why "実 credential、実番号、live endpoint が未接続で、公開してよい利用実績が無い。発見可能性より先に live qualification を閉じる。"}]
+   :business/job-focus
+   {:director
+    "設計、実装、live qualification、規制、収益を別々の状態として扱い、次に閉じる一つの境界を決める。実番号購入や継続課金を自分で承認しない。"
+    :product-manager
+    "Agent/Bot が番号を検索し、上限付き見積を確認し、owner consent 後に named operator へ渡し、割当とルートを観測できる一連の journey から未証明の一段だけを選ぶ。"
+    :engineer
+    "cloud-itonami-numbering の Telnyx adapter、監査台帳、割当・ルート、reconciliation の一つを、テストと失敗証拠を伴う最小変更として進める。secret を保存せず、購入権限を Bot に加えない。"
+    :qa
+    "見積上限、owner consent、regulatory bundle、named operator、注文 quarantine、release quarantine を独立に破ろうとする。mock 成功を Telnyx live 成功として扱わない。"
+    :sales
+    "番号が必要な一人の named prospect の国、番号種別、数量、用途、規制要件を確認し、現在の提供状態と未接続部分を正直に示す。注文や価格変更は行わない。"
+    :supporter
+    "利用者の番号状態、割当、ルーティング、pending order を読み取り、再現可能な事象として切り分ける。番号の解放や再購入は行わない。"
+    :financial-chief
+    "Telnyx の初期費用、月額、利用料と顧客価格を分け、quote 上限と粗利仮説を更新する。未実測単価を 0 とせず、資金移動や注文を行わない。"
+    :regulatory-guard
+    "国・番号種別・用途ごとの規制 bundle と本人確認要件を確認し、不足があれば注文・割当・解放を止める。要件を推測で埋めず、証拠の無い適合を承認しない。"}}
 ]}
