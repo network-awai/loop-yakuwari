@@ -455,6 +455,36 @@
     "Start from the observed boundary that `kbb` does not exist. Choose one dependency-ordered outcome: executable contract, runtime slice, compatibility inventory, or one proven script migration. Do not schedule bulk replacement before the runtime and parity gates exist."
     :engineer
     "First make `kbb` and `kotoba bb` execute a bounded Kotoba-authored automation slice from amu without a JVM. Then convert at most one nbb/bb script per run, preserving argv, cwd, environment, stdout, stderr, exit status, and filesystem effects. Keep the old entrypoint until differential proof passes."
-    :qa
+   :qa
     "Falsify KBB compatibility on the same script, inputs, environment, and machine as nbb or bb. Compare stdout, stderr, exit status, and filesystem effects. Unsupported host APIs are BLOCKED, not equivalent; compiler success or a smoke test alone cannot authorize replacement."}}
+
+  {:business/id :kotobascript
+   :business/name "KotobaScript"
+   :business/repo "kotoba-lang/amu"
+   :business/what
+   "Make Kotoba source compile and run as JavaScript through Amu with a
+    ClojureScript-like developer experience. Build on the existing
+    `:cljs-kotoba-v1` source backend and restricted `--target js` ESM backend;
+    neither backend alone proves a named, end-to-end KotobaScript surface."
+   :business/roles [:director :engineer :qa]
+   :business/roles-absent
+   [{:role :product-manager
+     :why "This is a bounded language/runtime program. The director owns the compatibility envelope and slice order until an external product surface exists."}
+    {:role :designer
+     :why "The first interface is a compiler and executable module contract, not a visual UI."}
+    {:role :sales
+     :why "There is no named buyer or commercial KotobaScript offering yet."}
+    {:role :marketer
+     :why "A public claim must wait for reproducible Node and browser execution evidence."}
+    {:role :supporter
+     :why "There are no supported KotobaScript users until the executable contract and diagnostics are released."}
+    {:role :financial-chief
+     :why "The language target has no independent pricing, revenue, or funds-moving responsibility."}]
+   :business/job-focus
+   {:director
+    "Define the smallest honest KotobaScript contract across source syntax, namespaces, modules, standard library, host capabilities, Node/browser execution, diagnostics, and source maps. Reuse Amu's existing cljs and restricted-JS backends where they fit; do not rename either backend and call the whole surface complete."
+    :engineer
+    "Deliver one end-to-end slice at a time: accepted Kotoba source, Amu lowering, deterministic JavaScript or ESM artifact, and real Node or browser execution without a JVM, nbb, or a ClojureScript compiler at runtime. Keep capabilities deny-by-default and preserve typed-value, fuel, overflow, module-graph, and export gates."
+    :qa
+    "Try to falsify KotobaScript with real generated artifacts. Compare the same supported program across the current Amu reference path and Node/browser execution, including values, stdout, errors, exit status, deterministic bytes, capability denial, and source locations. Unsupported ClojureScript semantics are explicit gaps, never silent compatibility."}}
 ]}
