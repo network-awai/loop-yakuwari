@@ -427,4 +427,34 @@
     :product-manager "blueprint と実装の差を 1 つ名指しし、次に閉じる面を決める。"
     :engineer "repo の実装を 1 つ進める。live host はまだ無いので、出荷ではなく検査可能な単位で進める。"
     :qa "実装が blueprint の主張どおりかを検査する。テストが無い主張は主張のままだと報告する。"}}
+
+  {:business/id :kbb-migration
+   :business/name "KBB migration"
+   :business/repo "kotoba-lang/amu"
+   :business/what
+   "Build KBB as the non-JVM `kotoba bb` execution path, then migrate the
+    workspace's existing nbb and bb scripts in dependency order. ADR 0257 is
+    the present boundary: the public Kotoba CLI is JVM-hosted and `kbb` does
+    not yet exist, so a renamed command is not a completed migration."
+   :business/roles [:director :engineer :qa]
+   :business/roles-absent
+   [{:role :product-manager
+     :why "This is a bounded runtime-and-migration program. The director owns dependency order and acceptance boundaries; a second prioritization role would duplicate that decision."}
+    {:role :designer
+     :why "The first deliverable is a CLI/runtime compatibility contract, not a human-facing interface."}
+    {:role :sales
+     :why "This internal migration has no named prospect or buying decision."}
+    {:role :marketer
+     :why "There is no public KBB release to promote until runtime and parity evidence exist."}
+    {:role :supporter
+     :why "There are no KBB users until a qualified executable surface exists."}
+    {:role :financial-chief
+     :why "The migration has no independent revenue, pricing, or funds-moving responsibility."}]
+   :business/job-focus
+   {:director
+    "Start from the observed boundary that `kbb` does not exist. Choose one dependency-ordered outcome: executable contract, runtime slice, compatibility inventory, or one proven script migration. Do not schedule bulk replacement before the runtime and parity gates exist."
+    :engineer
+    "First make `kbb` and `kotoba bb` execute a bounded Kotoba-authored automation slice from amu without a JVM. Then convert at most one nbb/bb script per run, preserving argv, cwd, environment, stdout, stderr, exit status, and filesystem effects. Keep the old entrypoint until differential proof passes."
+    :qa
+    "Falsify KBB compatibility on the same script, inputs, environment, and machine as nbb or bb. Compare stdout, stderr, exit status, and filesystem effects. Unsupported host APIs are BLOCKED, not equivalent; compiler success or a smoke test alone cannot authorize replacement."}}
 ]}
