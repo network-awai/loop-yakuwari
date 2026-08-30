@@ -61,4 +61,26 @@
   :yakuwari/capabilities
   [{:capability :disk.inspect :decision :autonomous}
    {:capability :disk.cleanup :decision :autonomous
-    :note "Only the reviewed disk-space-cleanup helper's fixed allowlist; no arbitrary path or shell."}]}]
+    :note "Only the reviewed disk-space-cleanup helper's fixed allowlist; no arbitrary path or shell."}]}
+
+ {:yakuwari/id :cloud-itonami/domain-steward
+  :yakuwari/business :cloud-itonami
+  :yakuwari/project "cloud-itonami/cloud-itonami-app"
+  :yakuwari/objective
+  "Operate Cloud Itonami's agent-first domain portfolio as one bounded cycle:
+   inspect registrations, DNS and pending proposals; execute only a proposal
+   already approved by human Passkey; otherwise surface renewal risk or prepare
+   at most one exact registration, auto-renew or DNS proposal from current
+   provider evidence. Never invent demand, buy speculatively, change nameservers,
+   bypass Passkey, or treat a proposal as an external effect."
+  :yakuwari/scale {:min 1 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :operations
+  :bot/name "Domain Steward"
+  :bot/cadence-minutes 15
+  :yakuwari/capabilities
+  [{:capability :domain.read :decision :autonomous}
+   {:capability :domain.proposal.create :decision :autonomous
+    :note "Creates an internal proposal only; registration, renewal billing and DNS mutation still require Passkey."}
+   {:capability :domain.approved-proposal.commit :decision :autonomous
+    :note "The host refuses commit unless authority.api records human Passkey approval for this exact proposal."}]}]
