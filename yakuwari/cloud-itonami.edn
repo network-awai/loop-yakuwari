@@ -1,7 +1,7 @@
 ;; Cloud Itonami's product runtime is cloud-itonami-app.  The business record
 ;; remains network-awai/cloud-itonami, but an Engineer or QA Bot asked to repair
 ;; the desktop/runtime cannot do that from the business/meta repository.  These
-;; two authored roles narrow their filesystem authority to the implementation
+;; three authored roles narrow their filesystem authority to the implementation
 ;; repository; every other Cloud Itonami role keeps the generated business
 ;; workspace.
 
@@ -42,4 +42,23 @@
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :release.block :decision :autonomous}
-   {:capability :deploy.production :decision :blocked}]}]
+   {:capability :deploy.production :decision :blocked}]}
+
+ {:yakuwari/id :cloud-itonami/disk-maintainer
+  :yakuwari/business :cloud-itonami
+  :yakuwari/project "cloud-itonami/cloud-itonami-app"
+  :yakuwari/objective
+  "Keep this Mac above the resident 20 GiB free-space floor. Observe the data
+   volume first, call the bounded disk cleanup only under pressure, and report
+   before/after bytes from the tool receipt. Never delete repositories, Git
+   history, worktrees, sessions, memories, documents, databases, DataLad,
+   browser profiles, Docker data, resident releases, or installed toolchains."
+  :yakuwari/scale {:min 1 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :operations
+  :bot/name "Disk Maintainer"
+  :bot/cadence-minutes 15
+  :yakuwari/capabilities
+  [{:capability :disk.inspect :decision :autonomous}
+   {:capability :disk.cleanup :decision :autonomous
+    :note "Only the reviewed disk-space-cleanup helper's fixed allowlist; no arbitrary path or shell."}]}]
