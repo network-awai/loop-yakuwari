@@ -25,6 +25,7 @@
   :marketer "makes the product findable and legible to people who have not heard of it"
   :supporter "answers the people already using it"
   :disk-maintainer "keeps the resident Mac above its disk floor using one bounded allowlisted cleanup capability"
+  :domain-steward "operates the agent-first domain portfolio: discovers and prices names, monitors registrations and DNS, prepares exact proposals, and commits only proposals already approved by Passkey"
   :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"}
 
  ;; sales and supporter and director correspond OUTWARD — they hold a
@@ -101,7 +102,7 @@
    :business/repo "network-awai/cloud-itonami"
    :business/domain "itonami.cloud"
    :business/what "AI-agent and robotics operating system for governed business work: capture, identity, work, communication and bounded autonomous execution share one auditable product surface."
-   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief :disk-maintainer]
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief :disk-maintainer :domain-steward]
    :business/roles-absent []
    :business/outward
    {:director {:identity "network-awai/person-itonami-director" :mailbox "director@itonami.cloud"}
