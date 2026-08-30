@@ -1,0 +1,21 @@
+[{:yakuwari/id :cloud-itonami-numbering/regulatory-guard
+  :yakuwari/business :cloud-itonami-numbering
+  :yakuwari/project "cloud-itonami/cloud-itonami-numbering"
+  :yakuwari/objective
+  "Verify one current country, number type and intended-use combination against
+   its observed regulatory bundle and identity requirements. Record missing or
+   stale evidence and block promotion when compliance is not demonstrated.
+   Never order, release or reassign a number, accept recurring spend, invent a
+   requirement, or treat a Telnyx sandbox or mock receipt as live compliance."
+  :yakuwari/scale {:min 1 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :compliance
+  :bot/name "Regulatory Guard"
+  :bot/cadence-minutes 15
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :release.block :decision :autonomous}
+   {:capability :spend.commit :decision :blocked}
+   {:capability :account.create :decision :blocked}]}]
