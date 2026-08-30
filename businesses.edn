@@ -431,12 +431,12 @@
 
   {:business/id :kbb-migration
    :business/name "KBB migration"
-   :business/repo "kotoba-lang/amu"
+   :business/repo "kotoba-lang/kotoba"
    :business/what
-   "Build KBB as the non-JVM `kotoba bb` execution path, then migrate the
-    workspace's existing nbb and bb scripts in dependency order. ADR 0257 is
-    the present boundary: the public Kotoba CLI is JVM-hosted and `kbb` does
-    not yet exist, so a renamed command is not a completed migration."
+   "Evolve the existing fail-closed `bin/kbb` bootstrap into the workspace's
+    Kotoba-authored automation path, then migrate nbb and bb scripts in
+    dependency order. The current command is explicitly `:bootstrap-jvm`;
+    native self-hosting and script-parity remain separate qualification gates."
    :business/roles [:director :engineer :qa]
    :business/roles-absent
    [{:role :product-manager
@@ -453,11 +453,11 @@
      :why "The migration has no independent revenue, pricing, or funds-moving responsibility."}]
    :business/job-focus
    {:director
-    "Start from the observed boundary that `kbb` does not exist. Choose one dependency-ordered outcome: executable contract, runtime slice, compatibility inventory, or one proven script migration. Do not schedule bulk replacement before the runtime and parity gates exist."
+    "Start from the observed boundary: `bin/kbb` accepts only `.kotoba` plus an explicit no-wildcard policy, hosts exact scoped `:fs/app-data`, records capability receipts, and reports `nbb-loaded? false`; it is still JVM-bootstrapped. Choose one dependency-ordered outcome: packaging, one real hosted capability with denial tests, compatibility inventory, or one proven script migration."
     :engineer
-    "First make `kbb` and `kotoba bb` execute a bounded Kotoba-authored automation slice from amu without a JVM. Then convert at most one nbb/bb script per run, preserving argv, cwd, environment, stdout, stderr, exit status, and filesystem effects. Keep the old entrypoint until differential proof passes."
+    "Extend `kbb` one capability slice at a time with a real provider and denial tests; never add a ClojureScript or nbb fallback. Convert at most one nbb/bb script per run, preserving argv, cwd, environment, stdout, stderr, exit status, and filesystem effects. Keep the old entrypoint until differential proof passes."
    :qa
-    "Falsify KBB compatibility on the same script, inputs, environment, and machine as nbb or bb. Compare stdout, stderr, exit status, and filesystem effects. Unsupported host APIs are BLOCKED, not equivalent; compiler success or a smoke test alone cannot authorize replacement."}}
+    "Falsify the KBB safety boundary before compatibility: reject `.cljs`, wildcard resources, unhosted capabilities, and out-of-scope writes; require receipts and `nbb-loaded? false`. For migration, compare the same script, inputs, environment, and machine across stdout, stderr, exit status, and filesystem effects. Unsupported host APIs are BLOCKED, not equivalent."}}
 
   {:business/id :kotobascript
    :business/name "KotobaScript"
