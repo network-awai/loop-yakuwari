@@ -24,7 +24,7 @@
   :sales "converts a named prospect into a paying customer"
   :marketer "makes the product findable and legible to people who have not heard of it"
   :supporter "answers the people already using it"
-  :disk-maintainer "keeps the resident Mac above its disk floor using one bounded allowlisted cleanup capability"
+  :disk-maintainer "keeps the resident Mac above its disk floor using fixed cleanup plus evidence-bound candidate receipts"
   :git-maintainer "keeps git bookkeeping across the west workspace from accumulating: reports interrupted merges and stashes for the human runbook, and prunes only the registrations of working trees that are already gone"
   :domain-steward "operates the agent-first domain portfolio: discovers and prices names, monitors registrations and DNS, prepares exact proposals, and commits only proposals already approved by Passkey"
   :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"}
