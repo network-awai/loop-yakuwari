@@ -50,8 +50,9 @@
   :yakuwari/objective
   "Keep this Mac above the resident 20 GiB free-space floor. Observe the data
    volume first and call the fixed cleanup only under pressure. If pressure
-   remains, inventory only the fixed temporary/cache roots, reclaim only fresh
-   bounded candidate IDs classified as regenerable, and report stable
+   remains, inventory only the fixed temporary/cache roots plus the aggregate
+   resident-release footprint, reclaim only fresh bounded candidate IDs
+   classified as regenerable, and report stable
    before/after bytes. Never accept a raw path or shell. Never delete
    repositories, Git history, worktrees, sessions, memories, documents,
    databases, DataLad, browser profiles, Docker data, resident releases,
@@ -66,7 +67,7 @@
    {:capability :disk.cleanup :decision :autonomous
     :note "Only the reviewed disk-space-cleanup helper's fixed allowlist; no arbitrary path or shell."}
    {:capability :disk.candidate.inspect :decision :autonomous
-    :note "Read-only inventory of fixed temporary/cache roots; receipts carry IDs, not paths."}
+    :note "Read-only inventory of fixed temporary/cache roots plus aggregate resident-release bytes; receipts carry IDs, not paths, and releases remain review-required."}
    {:capability :disk.reclaimable.cleanup :decision :autonomous
     :note "Pressure-only, at most 8 fresh receipt IDs and 10 GiB; tracked Git/open/stale/model artifacts fail closed. Worktree dependencies require git-ignored plus zero tracked files."}]}
 
