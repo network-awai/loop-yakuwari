@@ -175,7 +175,7 @@
   The projection carries semantic capability decisions for explanation. It
   is not an execution grant: Cloud Itonami still intersects each entry with
   the Bot's concrete tool/workspace grant."
-  [{:keys [fleet businesses workforce roles profiles]}]
+  [{:keys [fleet businesses workforce roles profiles skills]}]
   (let [bx (business-index businesses)
         templates (:awai.workforce/templates workforce)]
     {:schema "network.awai.workforce-bots.v1"
@@ -215,6 +215,10 @@
             "Act only inside this business and leave cross-business work blocked."
             "Record observed evidence separately from forecasts and proposals."]
            :capabilities caps
+           ;; Governed operating guidance, not authority. Cloud Itonami
+           ;; validates these bounded packages and still admits tools only
+           ;; from the capability/tool intersection.
+           :skills (mapv skills (:bot/skills role))
            :project (:yakuwari/project role)
            :workspace (str "orgs/" (:yakuwari/project role))
            :cadence-minutes (or (:bot/cadence-minutes role)
@@ -259,14 +263,36 @@
     :profile-role-matches-no-role  ... by kind
     :profile-assignment-names-unknown-profile  assigned to a profile that is
                               not in the table
-    :profiles-without-default a profile table with no :default to fall back to"
-  [{:keys [fleet businesses roles profiles]}]
+    :profiles-without-default a profile table with no :default to fall back to
+    :role-skill-missing       a role names no loaded governed Skill package
+    :role-skill-invalid       a role names too many, duplicate, or invalid Skills"
+  [{:keys [fleet businesses roles profiles skills]}]
   (let [bx (business-index businesses)
         outward-kinds (or (:awai.businesses/outward-roles businesses) #{})
         by-id (group-by :yakuwari/id roles)
         problems
         (vec
          (concat
+          ;; Skill packages are instructions, never authority. Still refuse a
+          ;; broken reference here: silently dropping it would provision a Bot
+          ;; that looks prepared while running without the reviewed method.
+          (mapcat
+           (fn [r]
+             (let [ids (:bot/skills r)
+                   duplicate? (not= (count ids) (count (set ids)))]
+               (concat
+                (when (or (> (count ids) 4)
+                          duplicate?
+                          (some #(not (keyword? %)) ids))
+                  [{:problem :role-skill-invalid
+                    :role/id (:yakuwari/id r)
+                    :skills ids}])
+                (for [id ids :when (nil? (get skills id))]
+                  {:problem :role-skill-missing
+                   :role/id (:yakuwari/id r)
+                   :skill id}))))
+           roles)
+
           ;; A profile says how a role runs. It may not say what it may do:
           ;; rejected rather than ignored, so a `:profile/tools` that would
           ;; have done nothing is a failure instead of a false belief.

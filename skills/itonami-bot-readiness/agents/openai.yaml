@@ -1,0 +1,4 @@
+interface:
+  display_name: "Itonami Bot Readiness"
+  short_description: "Design, wire, and verify bounded resident Bots"
+  default_prompt: "Use $itonami-bot-readiness to turn this resident Bot requirement into a bounded, live-verified capability slice."

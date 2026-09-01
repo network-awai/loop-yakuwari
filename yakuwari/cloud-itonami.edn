@@ -17,6 +17,9 @@
                    :scale-up-on {:queue-depth 2 :blocker-count 1}}
   :yakuwari/runners [{:runner :codex :weight 2}
                      {:runner :claude :weight 1}]
+  ;; Instruction only. Cloud Itonami loads this governed package into the
+  ;; Engineer's system context; it never becomes a tool or capability grant.
+  :bot/skills [:itonami-bot-readiness]
   :yakuwari/capabilities
   [{:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
