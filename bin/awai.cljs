@@ -21,6 +21,7 @@
             [clojure.string :as str]
             ["fs" :as fs]
             ["path" :as path]
+            ["crypto" :as crypto]
             ["child_process" :as cp]
             [awai.registry :as registry]
             [awai.loop :as loop']
@@ -59,6 +60,30 @@
        sort
        (mapv #(at "yakuwari" %))))
 
+(def skill-id-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+(def max-skill-chars 12000)
+
+(defn- skill-package [id]
+  (let [id-str (name id)]
+    (when (re-matches skill-id-pattern id-str)
+      (let [p (at "skills" id-str "SKILL.md")]
+        (when (fs/existsSync p)
+          (let [instructions (str (fs/readFileSync p "utf8"))
+                declared (second (re-find #"(?m)^name:\s*([a-z0-9-]+)\s*$"
+                                          instructions))]
+            (when (and (= id-str declared)
+                       (<= 1 (count instructions) max-skill-chars))
+              {:id id-str
+               :sha256 (-> (.createHash crypto "sha256")
+                           (.update instructions "utf8")
+                           (.digest "hex"))
+               :instructions instructions})))))))
+
+(defn- load-skill-packages [roles]
+  (into {}
+        (for [id (into (sorted-set) (mapcat :bot/skills) roles)]
+          [id (skill-package id)])))
+
 (defn load-registry
   "Read every file. Reports what it skipped and why — a corpus that hides
   what it could not read reads as a corpus with nothing to hide, which is
@@ -93,12 +118,14 @@
           ;; exactly as it did before one existed, rather than failing to load
           ;; over a file that only chooses which model answers.
           profiles (when (fs/existsSync (at "profiles.edn"))
-                     (read-edn (at "profiles.edn")))]
+                     (read-edn (at "profiles.edn")))
+          complete (registry/complete-roles businesses workforce roles)]
       {:fleet fleet
        :businesses businesses
        :workforce workforce
        :profiles profiles
-       :roles (registry/complete-roles businesses workforce roles)
+       :roles complete
+       :skills (load-skill-packages complete)
        :skipped @skipped})))
 
 (defn- die [code] (.exit js/process code))

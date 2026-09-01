@@ -205,18 +205,36 @@
         workforce {:awai.workforce/templates
                    {:qa {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 60}}}
         role (role-of :x/qa :x
+                      :bot/skills [:itonami-bot-readiness]
                       :yakuwari/capabilities
                       [{:capability :deploy.production :decision :blocked}])
+        skill {:id "itonami-bot-readiness"
+               :sha256 (apply str (repeat 64 "a"))
+               :instructions "---\nname: itonami-bot-readiness\n---\nUse evidence."}
         result (registry/workforce-bots
                 {:fleet fleet :businesses businesses :workforce workforce
-                 :roles [role]})
+                 :roles [role] :skills {:itonami-bot-readiness skill}})
         projected (first (:roles result))]
     (is (= "network.awai.workforce-bots.v1" (:schema result)))
     (is (= "x/qa" (:key projected)))
     (is (= :qa (get-in projected [:role :job])))
     (is (= :blocked (get-in projected [:capabilities 0 :decision])))
+    (is (= [skill] (:skills projected)))
     (is (nil? (:tools projected))
         "semantic capability policy must not become a Cloud Itonami tool grant")))
+
+(deftest a-declared-skill-must-resolve-without-becoming-authority
+  (let [role (role-of :x/qa :x :bot/skills [:missing])
+        result (registry/validate-fleet
+                {:fleet fleet
+                 :businesses {:awai.businesses/businesses
+                              [{:business/id :x :business/roles [:qa]}]}
+                 :roles [role]
+                 :skills {}})]
+    (is (some #(= {:problem :role-skill-missing
+                    :role/id :x/qa :skill :missing}
+                  %)
+              (:problems result)))))
 
 (deftest workforce-projection-names-the-business-organization-when-declared
   ;; A business may name the tenant it belongs to. One that does not is nil
