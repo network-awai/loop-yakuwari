@@ -27,7 +27,8 @@
   :yakuwari/identity "network-awai/person-x402-director"
   :yakuwari/mailbox "director@x402.nexus"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :roadmap.set :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
@@ -50,7 +51,8 @@
                    :scale-down-after-ms 300000}
   :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.triage :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}
@@ -74,7 +76,10 @@
   :yakuwari/identity "network-awai/person-x402-sales"
   :yakuwari/mailbox "sellers@x402.nexus"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :vf.append :decision :autonomous
+    :note "Measured production surface: seller onboarding produces EconomicEvents (ADR-2609111230 grant order step 2)."}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :customer.contact :decision :approval-required}
@@ -95,7 +100,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :voice-required}
    {:capability :spend.commit :decision :approval-required}
@@ -115,7 +121,8 @@
   :yakuwari/identity "network-awai/person-x402-supporter"
   :yakuwari/mailbox "support@x402.nexus"
   :yakuwari/capabilities
-  [{:capability :mail.inbound :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :issue.create :decision :autonomous}
    {:capability :incident.respond :decision :autonomous}

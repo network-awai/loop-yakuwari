@@ -54,7 +54,10 @@
   ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
   ;;                    :integrate :voice-required :external-effect :voice-required}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :vf.append :decision :autonomous
+    :note "Measured production surface: the revenue loop records its measured outcomes as EconomicEvents (ADR-2609111230 grant order step 2)."}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :voice-required}
@@ -78,7 +81,8 @@
   ;;                    :issue-create :approval-required :change-authority :blocked
   ;;                    :loop-stop :voice-required}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :approval-required}
    {:capability :patch.create :decision :blocked
     :note "The actor's own objective: never modify source."}
@@ -104,7 +108,8 @@
   ;;                    :production-validation :approval-required
   ;;                    :change-authority :blocked}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :blocked}
    {:capability :patch.integrate :decision :blocked}
@@ -126,7 +131,8 @@
   ;; :actor/hil-policy {:mirror-pr-create :autonomous :ci-observe :autonomous
   ;;                    :promote :voice-required :change-authority :blocked}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous
     :note "A mirror PR is a proposal on the GitHub side; promotion stays with Radicle."}
@@ -151,7 +157,8 @@
   ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
   ;;                    :integrate :voice-required :external-effect :voice-required}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :voice-required}
@@ -179,7 +186,8 @@
   ;; :actor/hil-policy {:issue-create :autonomous :patch-create :autonomous
   ;;                    :integrate :voice-required :external-effect :voice-required}
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :voice-required}

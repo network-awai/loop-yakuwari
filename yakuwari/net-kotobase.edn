@@ -25,7 +25,8 @@
   :yakuwari/identity "network-awai/person-kotobase-director"
   :yakuwari/mailbox "director@kotobase.net"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :roadmap.set :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
@@ -47,7 +48,8 @@
                    :scale-down-after-ms 300000}
   :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.triage :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}
@@ -71,7 +73,10 @@
   :yakuwari/identity "network-awai/person-kotobase-sales"
   :yakuwari/mailbox "sales@kotobase.net"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :vf.append :decision :autonomous
+    :note "Measured production surface: kotobase.net commerce (ADR-2609111230 grant order step 2)."}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :customer.contact :decision :approval-required}
@@ -91,7 +96,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :voice-required}
    {:capability :sla.commit :decision :blocked
@@ -113,7 +119,8 @@
   :yakuwari/identity "network-awai/person-kotobase-supporter"
   :yakuwari/mailbox "support@kotobase.net"
   :yakuwari/capabilities
-  [{:capability :mail.inbound :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :issue.create :decision :autonomous}
    {:capability :incident.respond :decision :autonomous
@@ -143,7 +150,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.create :decision :autonomous
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous
     :note "Proposes into cloud-itonami's queue as :proposed; a human clears it. The narrow ingress key cannot approve."}
    {:capability :issue.triage :decision :autonomous}
    {:capability :patch.create :decision :approval-required

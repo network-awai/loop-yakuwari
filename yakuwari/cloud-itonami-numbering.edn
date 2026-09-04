@@ -13,7 +13,8 @@
   :bot/name "Regulatory Guard"
   :bot/cadence-minutes 15
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :test.run :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :release.block :decision :autonomous}

@@ -22,7 +22,8 @@
   :yakuwari/identity "network-awai/person-babiniku-director"
   :yakuwari/mailbox "director@babiniku.net"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :roadmap.set :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
@@ -43,7 +44,8 @@
                    :scale-down-after-ms 300000}
   :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.triage :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}
@@ -61,7 +63,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :design.propose :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :design.propose :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}]}
@@ -77,7 +80,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :approval-required
     :note "Stricter than the fleet ceiling's :voice-required, on purpose. Copy about a synthetic persona is exactly where an unreviewed claim does real harm."}
@@ -98,7 +102,8 @@
   :yakuwari/identity "network-awai/person-babiniku-supporter"
   :yakuwari/mailbox "support@babiniku.net"
   :yakuwari/capabilities
-  [{:capability :mail.inbound :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :issue.create :decision :autonomous}
    {:capability :customer.contact :decision :approval-required}
@@ -126,7 +131,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.create :decision :autonomous
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous
     :note "Proposes into cloud-itonami's queue as :proposed; a human clears it. The narrow ingress key cannot approve."}
    {:capability :issue.triage :decision :autonomous}
    {:capability :patch.create :decision :approval-required
