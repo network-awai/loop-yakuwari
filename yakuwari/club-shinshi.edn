@@ -22,7 +22,8 @@
   :yakuwari/identity "network-awai/person-shinshi-director"
   :yakuwari/mailbox "director@shinshi.club"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :roadmap.set :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
@@ -43,7 +44,8 @@
                    :scale-down-after-ms 300000}
   :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.triage :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required
@@ -60,7 +62,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :design.propose :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :design.propose :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}]}
@@ -79,7 +82,8 @@
   :yakuwari/identity "network-awai/person-shinshi-sales"
   :yakuwari/mailbox "membership@shinshi.club"
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required
     :note "Every outbound message here reaches a real person who did not ask for it."}
@@ -98,7 +102,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :voice-required}
    {:capability :spend.commit :decision :approval-required}]}
@@ -116,7 +121,8 @@
   :yakuwari/identity "network-awai/person-shinshi-supporter"
   :yakuwari/mailbox "support@shinshi.club"
   :yakuwari/capabilities
-  [{:capability :mail.inbound :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
    {:capability :mail.send :decision :approval-required}
    {:capability :issue.create :decision :autonomous}
    {:capability :customer.contact :decision :approval-required}
@@ -144,7 +150,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :issue.create :decision :autonomous
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous
     :note "Proposes into cloud-itonami's queue as :proposed; a human clears it. The narrow ingress key cannot approve."}
    {:capability :issue.triage :decision :autonomous}
    {:capability :patch.create :decision :approval-required
@@ -172,7 +179,8 @@
   :yakuwari/scale {:min 0 :desired 12 :max 12}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :content.draft :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :autonomous
     :note "Publishes only through the product's own cast feed — self-labelled fiction on shinshi.club and the character's own aozora account — never as outward corporate correspondence, which stays with marketer (:voice-required)."}]}
 
@@ -190,7 +198,8 @@
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
-  [{:capability :content.draft :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
    {:capability :content.publish :decision :autonomous
     :note "Debut records for newly minted characters, written and counted back by produce.cljs."}
    {:capability :issue.create :decision :autonomous}]}

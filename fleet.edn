@@ -76,7 +76,18 @@
   ;; Never gated. A deletion request IS the authorisation, and making a
   ;; data subject wait on an approval queue is the failure mode that
   ;; matters here.
-  :subject.erase :autonomous}
+  :subject.erase :autonomous
+
+  ;; The Valueflows economic plane (ADR-2609111230). The ceiling NAMES
+  ;; :vf.commit only, and it names it :approval-required: writing a
+  ;; commitment on another party's behalf is the step-3 grant, the journal
+  ;; requires an upstream vf:Agreement, and the gateway effect loop that
+  ;; would carry an admitted append intent into vf-journal/append-event! is
+  ;; not wired yet — so a commitment leaves the estate with no economic
+  ;; record behind it. :vf.read and :vf.append are deliberately absent:
+  ;; the ceiling is a bound, not a whitelist, and read is exactly the
+  ;; observation-everyone-gets grant order step 1 already gives every role.
+  :vf.commit :approval-required}
 
  ;; Authority boundaries. Cross-business action is blocked outright: a role
  ;; that could act on another business's repo would make the per-business

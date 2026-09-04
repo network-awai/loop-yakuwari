@@ -21,7 +21,8 @@
   ;; Engineer's system context; it never becomes a tool or capability grant.
   :bot/skills [:itonami-bot-readiness]
   :yakuwari/capabilities
-  [{:capability :issue.triage :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
    {:capability :patch.integrate :decision :approval-required}
@@ -40,7 +41,8 @@
                    :scale-up-on {:blocker-count 1}}
   :yakuwari/runners [{:runner :codex :weight 1}]
   :yakuwari/capabilities
-  [{:capability :metrics.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
    {:capability :test.run :decision :autonomous}
    {:capability :issue.create :decision :autonomous}
    {:capability :patch.create :decision :autonomous}
@@ -66,7 +68,8 @@
   :bot/name "Disk Maintainer"
   :bot/cadence-minutes 15
   :yakuwari/capabilities
-  [{:capability :disk.inspect :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :disk.inspect :decision :autonomous}
    {:capability :disk.cleanup :decision :autonomous
     :note "Only the reviewed disk-space-cleanup helper's fixed allowlist; no arbitrary path or shell."}
    {:capability :disk.candidate.inspect :decision :autonomous
@@ -90,7 +93,8 @@
   :bot/name "Domain Steward"
   :bot/cadence-minutes 15
   :yakuwari/capabilities
-  [{:capability :domain.read :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :domain.read :decision :autonomous}
    {:capability :domain.proposal.create :decision :autonomous
     :note "Creates an internal proposal only; registration, renewal billing and DNS mutation still require Passkey."}
    {:capability :domain.approved-proposal.commit :decision :autonomous
@@ -128,6 +132,7 @@
   :bot/name "Git Maintainer"
   :bot/cadence-minutes 60
   :yakuwari/capabilities
-  [{:capability :git.inspect :decision :autonomous}
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :git.inspect :decision :autonomous}
    {:capability :git.cleanup :decision :autonomous
     :note "Only `git worktree prune`, and only in checkouts whose stale registrations were re-measured at call time. No path, no shell, no push."}]}]
