@@ -20,7 +20,7 @@
   invisible from inside either file alone. `validate-fleet` reports all of
   them at once, following `yakuwari.spec`'s own rule that one error per round
   trip turns an N-field form into an N-step one."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [yakuwari.spec :as spec]
             [yakuwari.policy :as policy]))
 
