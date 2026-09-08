@@ -18,7 +18,7 @@
 
 (ns awai.cli
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             ["fs" :as fs]
             ["path" :as path]
             ["crypto" :as crypto]
