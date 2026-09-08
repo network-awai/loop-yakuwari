@@ -17,7 +17,7 @@
 ;; installed here grants a role more than fleet.edn allows.
 
 (ns awai.install
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             ["fs" :as fs]
             ["path" :as path]
             ["os" :as os]
