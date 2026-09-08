@@ -19,7 +19,7 @@
   about."
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             #?(:cljs ["fs" :as fs])
             #?(:cljs ["path" :as path])))
 

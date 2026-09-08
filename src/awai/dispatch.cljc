@@ -46,7 +46,7 @@
   **Terminal runs are pruned.** `journal/runs.edn` answers 'what occupies a
   slot', and tamaki's event store is the history. Keeping succeeded runs here
   would grow the file without changing a single decision."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 ;; ---------------------------------------------------------------------------
 ;; configuration

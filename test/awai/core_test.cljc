@@ -4,7 +4,7 @@
             [awai.registry :as registry]
             [awai.loop :as loop']
             [awai.dispatch :as dispatch]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def t0 1785000000000)
 
