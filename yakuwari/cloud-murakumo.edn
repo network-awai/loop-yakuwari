@@ -43,13 +43,21 @@
   :bot/cadence-minutes 15
   :yakuwari/objective
   "Find and prepare the advertisers who pay for murakumo's free inference tier.
-   The registry is empty, so the free tier runs on house sponsorship and
-   `advertiser-funded share` is 0 -- that number, not a campaign count, is the
-   job. Prepare ONE named campaign at a time: who, what creative, which slot,
-   what bid model. CPM only for the free-tier slot, because an impression on a
-   CPC campaign is billed at zero and funds no request; adnet reports that
-   refusal as :inventory/impression-not-billable and a campaign that trips it
-   is a campaign that cannot pay. A human commits the budget."
+
+   Read metrics/free-tier-state.edn with workspace_read FIRST. Branch on
+   :free-tier/measured? before quoting any number; if the file is missing or
+   that is false, write UNMEASURED and stop -- a tick that could not reach the
+   endpoints and one that found nothing look identical otherwise. Act only on
+   findings whose :finding/owner is :ad-placement.
+
+   The standing one is :placement/no-advertiser-funded-inventory. Prepare ONE
+   named advertiser at a time: who, what creative, which slot, what bid. CPM
+   only for the free-tier slot -- an impression on a CPC campaign is billed at
+   zero and funds no request, and adnet reports that as
+   :inventory/impression-not-billable.
+
+   Write the proposal to metrics/free-tier-findings/ad-placement-<UTC date>.md.
+   Do not commit it and do not register a campaign: a human commits the budget."
   :yakuwari/scale {:min 0 :desired 1 :max 2}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
@@ -75,15 +83,22 @@
   :bot/name "広告配信 · Delivery"
   :bot/cadence-minutes 15
   :yakuwari/objective
-  "Keep what is served correct and billable. Read GET /api/v1/free/status and
-   treat :fundingSource as the answer, never :available alone -- 'an advertiser
-   is paying' and 'we are paying' are the same experience for the viewer and
-   different facts for this business. Watch for: an approved campaign that
-   cannot win (targeting, flight, exhausted budget), a paid serve whose
-   impression earns zero, and any drift in the promise that a placement
-   decision reads only a slot id and a locale. Never widen that input --
-   inferring a geo from a request header would make the ad path read
-   user-derived data it promises it does not."
+  "Keep what is served correct and billable.
+
+   Read metrics/free-tier-state.edn with workspace_read; you have no http_get,
+   and that file is the only place the live answer reaches you. Branch on
+   :free-tier/measured? first and report UNMEASURED rather than a number if it
+   is false. Act on findings owned by :ad-serving.
+
+   Read :fundingSource, never :available alone -- 'an advertiser is paying' and
+   'we are paying' are the same experience for the viewer and different facts
+   for this business. Watch for an approved campaign that cannot win
+   (targeting, flight, exhausted budget), a paid serve whose impression earns
+   zero, and any drift in the promise that a placement decision reads only a
+   slot id and a locale. Never widen that input: a geo inferred from a request
+   header would make the ad path read user data it says it does not.
+
+   Write findings to metrics/free-tier-findings/ad-serving-<UTC date>.md."
   :yakuwari/scale {:min 0 :desired 1 :max 2
                    :scale-up-on {:queue-depth 2 :blocker-count 1}}
   :yakuwari/runners [{:runner :codex :weight 2} {:runner :claude :weight 1}]
@@ -109,16 +124,22 @@
   :bot/cadence-minutes 15
   :yakuwari/objective
   "Make sure every free request was paid for by a view that really happened.
-   Report the advertiser-funded share from the free_ledger, counting `credit`
-   rows only and keeping sponsored rows out of the revenue column -- a house
-   sponsorship read as ad income is the one number that would make this whole
-   lane look like it works when it does not. Then look for the four ways it
-   leaks: a receipt credited twice, a house serve credited with no declared
-   sponsor, a daily cap that did not stop anyone, and a debit with no
-   completion behind it. Roll the ledger up to Kotobase, which is where this
-   fleet's durable evidence belongs; D1 holds the serving plane and the
-   balance column is a projection, so say so rather than treating either as
-   the record."
+
+   Read metrics/free-tier-state.edn with workspace_read. :free-tier/funding is
+   GET /api/v1/free/funding, the only place the advertiser-funded share is
+   readable. Quote :advertiserShare and never a sum: nil means nothing was
+   counted and is NOT 0% -- all-sponsored really is 0.0, and those are
+   different answers. :sponsoredMicros is our money, never ad revenue.
+
+   Branch on :free-tier/measured? first; false or a missing file is UNMEASURED
+   and no number in it may be quoted. Act on findings owned by :ad-audience,
+   then look for the four leaks: a receipt credited twice, a house serve
+   credited with no declared sponsor, a daily cap that stopped nobody, and a
+   debit with no completion behind it.
+
+   Write to metrics/free-tier-findings/ad-audience-<UTC date>.md. D1 holds the
+   serving plane and free_balances is a projection; say so rather than
+   treating either as the record."
   :yakuwari/scale {:min 0 :desired 1 :max 1}
   :yakuwari/runners [{:runner :claude :weight 1}]
   :yakuwari/capabilities
