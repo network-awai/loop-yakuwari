@@ -121,7 +121,14 @@
    :business/repo "network-awai/cloud-murakumo"
    :business/domain "murakumo.cloud"
    :business/what "Distributed private inference and generation on an owned Mac-mini fleet, with public routing, capacity, recovery and execution evidence kept distinct."
-   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief]
+   ;; The last three operate the ad-funded free inference lane and are authored
+   ;; under yakuwari/cloud-murakumo.edn -- there is no operating-role template
+   ;; for them, and `complete-roles` skips a declared kind with no template
+   ;; rather than inventing one. Three rather than one because 出稿 wants more
+   ;; spend and 閲覧 is the role that reports the spend did not materialise;
+   ;; one Bot holding both would audit its own work. See ADR-2609091500.
+   :business/roles [:director :product-manager :engineer :qa :designer :sales :marketer :supporter :financial-chief
+                    :ad-placement :ad-serving :ad-audience]
    :business/roles-absent []
    :business/outward
    {:director {:identity "network-awai/person-murakumo-director" :mailbox "director@murakumo.cloud"}
