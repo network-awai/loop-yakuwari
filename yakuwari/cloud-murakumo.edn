@@ -30,7 +30,8 @@
 ;; any reason, and a role that could fund a campaign to make its own numbers
 ;; look better is exactly the reason that floor is not negotiable.
 ;;
-;; Design: superproject ADR-2609091500. The decision layer is
+;; Design: superproject adr-2609091500-ad-funded-free-inference-on-murakumo
+;; (the bare number resolves to three ADRs). The decision layer is
 ;; kotoba-lang/adnet (core + billing + entitlement); the serving layer is
 ;; cloud-murakumo.free-tier + free-tier-http.
 
