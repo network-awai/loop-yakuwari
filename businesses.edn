@@ -27,7 +27,8 @@
   :disk-maintainer "keeps the resident Mac above its disk floor using fixed cleanup plus evidence-bound candidate receipts, while surfacing resident-release pressure without deleting releases"
   :git-maintainer "keeps git bookkeeping across the west workspace from accumulating: reports interrupted merges and stashes for the human runbook, and prunes only the registrations of working trees that are already gone"
   :domain-steward "operates the agent-first domain portfolio: discovers and prices names, monitors registrations and DNS, prepares exact proposals, and commits only proposals already approved by Passkey"
-  :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"}
+  :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"
+  :corpus-analyst "reads one knowledge corpus' own registry, ontology and coverage notes and states the single next bounded step with the evidence that is missing — never an ingest, because admitting bytes needs a fetched, digest-checked pin this role cannot produce"}
 
  ;; sales and supporter and director correspond OUTWARD — they hold a
  ;; mailbox and a did:web (owner decision 2026-07-30). engineer, designer and
@@ -520,4 +521,45 @@
     "Telnyx の初期費用、月額、利用料と顧客価格を分け、quote 上限と粗利仮説を更新する。未実測単価を 0 とせず、資金移動や注文を行わない。"
     :regulatory-guard
     "国・番号種別・用途ごとの規制 bundle と本人確認要件を確認し、不足があれば注文・割当・解放を止める。要件を推測で埋めず、証拠の無い適合を承認しない。"}}
+
+  {:business/id :hyakka
+   :business/name "hyakka"
+   :business/repo "network-awai/app-hyakka"
+   :business/domain "wiki.kotobase.net"
+   :business/what
+   "wiki.kotobase.net (百科) の知識コーパスとオントロジー。主張はすべて archive
+    済みバイト列の逐語部分文字列を証拠に持ち、corpus ごとの admission policy が
+    出所クラスで受理を決める。産業・職業・調達・プロセスの分類 (ISIC / APQC PCF /
+    ISCO / UNSPSC / COFOG / BPMN) はその一部で、pin (source-url + sha256 + bytes +
+    fetched-at) を持つ mirror だけが seed になれる。"
+   :business/note
+   "実測 2026-09-09: live は 22 corpus / items 3,465 / raw-claims 24,409。この分類群で
+    入っているのは isic 830 (Rev.5) と apqc 13 (PCF v7.4 の L1 のみ) だけで、
+    ISCO / UNSPSC / COFOG / BPMN は corpus が存在しない —— 未着手ではなく、mirror に
+    pin が無いので admission が落としている (ADR-2608300900)。取り込みの実行
+    (upstream バイトの取得、digest の再計算、npm test、PR) は hermes の gated pipeline
+    (~/.hermes profiles hyakka / wiki-isic-crawl / wiki-isco-crawl) が持ち、この
+    workforce の役割は analysis だけ。理由は capability ではなく道具立て: workforce Bot の
+    workspace は git root ちょうど 1 つ (workspace_tools/admit-root) で、fetch も shell も
+    push も無い (cloud-itonami-app config.edn がそう書いている)。"
+   :business/roles [:corpus-analyst]
+   :business/roles-absent
+   [{:role :engineer
+     :why "コーパスの ladder (vocabulary -> registry 配線 -> pinned seed -> tests) を進める
+           には upstream バイトの取得、sha256 の再計算、suite の実行、PR が要る。この lane には
+           fetch も shell も push tool も無いので、engineer を置いても『提案はするが着地
+           できない』役になる。実行は hermes の gated pipeline に残す。"}
+    {:role :qa
+     :why "falsify の主要な道具が test.run で、それを走らせる shell がこの lane に無い。
+           走らせられない検査を持つ QA は、測れなかったことと問題が無かったことを同じ値で
+           返す —— この workspace が 8 問目で名指ししている形そのもの。"}
+    {:role :product-manager
+     :why "increment を選ぶ判断は corpus-analyst の 1 反復と同じ単位。二つ置くと同じ待ち行列を
+           二重に消費する。"}
+    {:role :designer
+     :why "wiki の見た目は app-hyakka の UI が持ち、コーパス側に人向けの面は無い。"}
+    {:role :sales :why "named prospect が無い。百科は公開データで、売る面は net-kotobase 側。"}
+    {:role :marketer :why "宣伝すべき公開の増分はコーパスの中身であって、この役の仕事ではない。"}
+    {:role :supporter :why "問い合わせ窓口は wiki を提供する net-kotobase が持つ。"}
+    {:role :financial-chief :why "独立した収益・価格・資金移動が無い。"}]}
 ]}
