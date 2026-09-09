@@ -1,0 +1,135 @@
+;; cloud-murakumo — the three roles that operate the ad-funded free inference
+;; lane. The other nine roles this business declares are template-expanded from
+;; workforce.edn; only these are authored, because there is no operating-role
+;; template for them and `complete-roles` skips a declared kind with no
+;; template rather than inventing one.
+;;
+;; WHY THREE AND NOT ONE. The lane has three parties with three different
+;; failure modes, and one role holding all three would be asked to audit its
+;; own work:
+;;
+;;   出稿 (placement)  the advertiser side. Onboards campaigns and holds the
+;;                     budget. Its failure is an empty registry: nobody is
+;;                     paying, so the free tier is either off or funded by us.
+;;   配信 (serving)    the delivery side. Its failure is serving an ad that
+;;                     earns nothing (a CPC campaign wins the auction and its
+;;                     impressions are billed at zero) or serving one nobody
+;;                     approved.
+;;   閲覧 (audience)   the viewer side. Its failure is a minted free request
+;;                     that no impression paid for -- a replayed receipt, a
+;;                     sponsorship counted as revenue, a cap that does not cap.
+;;
+;; 出稿 wants more spend; 閲覧 is the role that says the spend did not
+;; materialise. Putting both in one Bot removes the only reader who has a
+;; reason to disagree.
+;;
+;; MONEY, load-bearing. None of these three may move funds, and 出稿 may not
+;; commit a campaign budget on its own. An advertiser's USDC deposit is
+;; verified on-chain (treasury) and nothing here holds a key; the workspace
+;; safety floor forbids buying, selling, transferring or converting funds for
+;; any reason, and a role that could fund a campaign to make its own numbers
+;; look better is exactly the reason that floor is not negotiable.
+;;
+;; Design: superproject ADR-2609091500. The decision layer is
+;; kotoba-lang/adnet (core + billing + entitlement); the serving layer is
+;; cloud-murakumo.free-tier + free-tier-http.
+
+[{:yakuwari/id :cloud-murakumo/ad-placement
+  :yakuwari/business :cloud-murakumo
+  :yakuwari/project "network-awai/cloud-murakumo"
+  :bot/role :ad-placement
+  :bot/name "広告出稿 · Advertiser desk"
+  :bot/cadence-minutes 15
+  :yakuwari/objective
+  "Find and prepare the advertisers who pay for murakumo's free inference tier.
+   The registry is empty, so the free tier runs on house sponsorship and
+   `advertiser-funded share` is 0 -- that number, not a campaign count, is the
+   job. Prepare ONE named campaign at a time: who, what creative, which slot,
+   what bid model. CPM only for the free-tier slot, because an impression on a
+   CPC campaign is billed at zero and funds no request; adnet reports that
+   refusal as :inventory/impression-not-billable and a campaign that trips it
+   is a campaign that cannot pay. A human commits the budget."
+  :yakuwari/scale {:min 0 :desired 1 :max 2}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :mail.inbound :decision :autonomous}
+   {:capability :mail.send :decision :approval-required}
+   {:capability :customer.contact :decision :approval-required
+    :note "An advertiser conversation commits murakumo to serving something. Prepare it; a human sends it."}
+   {:capability :campaign.register :decision :approval-required
+    :note "Registering a campaign puts a third party's creative in front of our users and starts billing them. Both halves need a human."}
+   {:capability :pricing.change :decision :blocked
+    :note "The free tier's unit price is derived from the x402 offer, not set here. Two places deciding what a request is worth is how the paid and free lanes drift apart."}
+   {:capability :spend.commit :decision :approval-required}
+   {:capability :funds.move :decision :blocked
+    :note "Never, for any role, for any reason. An advertiser's deposit is verified on-chain and no part of this lane holds a key."}]}
+
+ {:yakuwari/id :cloud-murakumo/ad-serving
+  :yakuwari/business :cloud-murakumo
+  :yakuwari/project "network-awai/cloud-murakumo"
+  :bot/role :ad-serving
+  :bot/name "広告配信 · Delivery"
+  :bot/cadence-minutes 15
+  :yakuwari/objective
+  "Keep what is served correct and billable. Read GET /api/v1/free/status and
+   treat :fundingSource as the answer, never :available alone -- 'an advertiser
+   is paying' and 'we are paying' are the same experience for the viewer and
+   different facts for this business. Watch for: an approved campaign that
+   cannot win (targeting, flight, exhausted budget), a paid serve whose
+   impression earns zero, and any drift in the promise that a placement
+   decision reads only a slot id and a locale. Never widen that input --
+   inferring a geo from a request header would make the ad path read
+   user-derived data it promises it does not."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}}
+  :yakuwari/runners [{:runner :codex :weight 2} {:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "The ad path is inside the worker that serves murakumo.cloud's paid inference. A bad deploy here stops paying customers, not just ads."}
+   {:capability :campaign.register :decision :blocked
+    :note "Delivery may report that inventory is unsold; it may not solve that by adding inventory. That is 出稿's job and it is the separation this trio exists for."}
+   {:capability :pricing.change :decision :blocked}
+   {:capability :funds.move :decision :blocked}]}
+
+ {:yakuwari/id :cloud-murakumo/ad-audience
+  :yakuwari/business :cloud-murakumo
+  :yakuwari/project "network-awai/cloud-murakumo"
+  :bot/role :ad-audience
+  :bot/name "広告閲覧 · Audience integrity"
+  :bot/cadence-minutes 15
+  :yakuwari/objective
+  "Make sure every free request was paid for by a view that really happened.
+   Report the advertiser-funded share from the free_ledger, counting `credit`
+   rows only and keeping sponsored rows out of the revenue column -- a house
+   sponsorship read as ad income is the one number that would make this whole
+   lane look like it works when it does not. Then look for the four ways it
+   leaks: a receipt credited twice, a house serve credited with no declared
+   sponsor, a daily cap that did not stop anyone, and a debit with no
+   completion behind it. Roll the ledger up to Kotobase, which is where this
+   fleet's durable evidence belongs; D1 holds the serving plane and the
+   balance column is a projection, so say so rather than treating either as
+   the record."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required}
+   {:capability :campaign.register :decision :blocked
+    :note "The role that audits the funding must not be able to create the funding it audits."}
+   {:capability :subject.erase :decision :autonomous
+    :note "The ledger holds a viewer DID against what they watched. An erasure request IS the authorisation; making a data subject wait on a queue is the failure that matters here."}
+   {:capability :pricing.change :decision :blocked}
+   {:capability :funds.move :decision :blocked}]}]
