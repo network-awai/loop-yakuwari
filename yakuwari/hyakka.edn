@@ -1,0 +1,43 @@
+;; hyakka — wiki.kotobase.net の知識コーパス。
+;;
+;; 役は 1 つだけで、それは謙遜ではなく道具立ての帰結である。workforce Bot の
+;; workspace は git root ちょうど 1 つ (cloud-itonami-app workspace_tools/admit-root)、
+;; 持っている道具は workspace の読み書きと local commit だけで、fetch も shell も
+;; push も無い。コーパスの ladder を実際に進めるには upstream バイトの取得と
+;; sha256 の再計算と suite の実行と PR が要るので、その半分は hermes の gated
+;; pipeline に残す。ここが持つのは analysis の半分である。
+;;
+;; cadence が 720 なのは、他の多くの役が 15 だからといって同じ数を書くと嘘に
+;; なるため。実測 2026-09-09: この lane は max-active 1 / max-starts-per-tick 1 で、
+;; 直近 7 日の resident 提出は 94 job に対して 1〜4 件/日。15 分を名乗る役をもう 1 つ
+;; 足しても待ち行列が伸びるだけで、間隔は次の 1 回を早めない。etzhayyim の 6 役が
+;; 720 を使っているのと同じ理由。
+[{:yakuwari/id :hyakka/corpus-analyst
+  :yakuwari/business :hyakka
+  :yakuwari/project "network-awai/app-hyakka"
+  :yakuwari/objective
+  "Read app-hyakka's corpus registry, ontology and coverage notes, and record ONE
+   bounded next step for the classification corpora (ISIC, APQC PCF, ISCO, UNSPSC,
+   COFOG, BPMN). Name which rung is unmet for the corpus you pick — vocabulary
+   namespace, registry wiring, pinned seed, tests — and which evidence is missing.
+   A taxonomy whose mirror carries no pin (source-url + sha256 + bytes + fetched-at)
+   is UNVERIFIED, not absent; say that rather than proposing an ingest. This
+   workspace can read and commit inside app-hyakka only: it cannot fetch upstream
+   bytes, recompute a digest, run the suite or open a pull request, so never report
+   an ingest as landed, and never write into knowledge/ledger or knowledge/receipts,
+   which are append-only history."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :codex :weight 1}]
+  :bot/role :corpus-analyst
+  :bot/name "Corpus Analyst"
+  :bot/cadence-minutes 720
+  :yakuwari/capabilities
+  [{:capability :metrics.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :patch.create :decision :autonomous
+    :note "docs/ 配下の analysis note と local commit まで。ledger/receipts には書かない。"}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :blocked}
+   {:capability :content.publish :decision :blocked}
+   {:capability :spend.commit :decision :blocked}
+   {:capability :account.create :decision :blocked}]}]
