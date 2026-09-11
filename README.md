@@ -138,10 +138,10 @@ assuming it is load-bearing.
 ## Use
 
 Sources are `.cljk` (2026-09-11 rename). nbb does not yet resolve `.cljk`
-namespaces, so `bin/awai.cljs` is a **loader**: it routes the classpath through
+namespaces, so `bin/awai.cljs.cljk` is a **loader**: it routes the classpath through
 the superproject's `scripts/cljk-classpath.cljs` and execs `bin/awai.cljk`
 with your arguments. It is also the file cloud-itonami-app's provisioner runs,
-which is why it kept its name. `nbb bin/awai.cljs check` therefore works;
+which is why it kept its name. `nbb bin/awai.cljs.cljk check` therefore works;
 `nbb bin/awai.cljk check` does not, until nbb learns the extension.
 
 ```sh
