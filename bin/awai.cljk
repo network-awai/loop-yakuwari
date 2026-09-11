@@ -6,15 +6,15 @@
 ;; this file is only I/O and argument handling, so the deciding logic stays
 ;; testable without a filesystem.
 ;;
-;;   nbb bin/awai.cljs check              # cross-file agreement; exit 1 on drift
-;;   nbb bin/awai.cljs roles              # every role, one line each
-;;   nbb bin/awai.cljs ceiling            # where fleet.edn narrows a role
-;;   nbb bin/awai.cljs identities         # the person-* repos the registry expects
-;;   nbb bin/awai.cljs project            # the display model, as EDN
-;;   nbb bin/awai.cljs tick [--apply]     # one loop cycle; dry-run by default
-;;   nbb bin/awai.cljs runs               # what currently occupies a slot
-;;   nbb bin/awai.cljs sync               # refresh run statuses from tamaki
-;;   nbb bin/awai.cljs dispatch [--apply] # tick, then PERFORM its effects
+;;   nbb bin/awai.cljk check              # cross-file agreement; exit 1 on drift
+;;   nbb bin/awai.cljk roles              # every role, one line each
+;;   nbb bin/awai.cljk ceiling            # where fleet.edn narrows a role
+;;   nbb bin/awai.cljk identities         # the person-* repos the registry expects
+;;   nbb bin/awai.cljk project            # the display model, as EDN
+;;   nbb bin/awai.cljk tick [--apply]     # one loop cycle; dry-run by default
+;;   nbb bin/awai.cljk runs               # what currently occupies a slot
+;;   nbb bin/awai.cljk sync               # refresh run statuses from tamaki
+;;   nbb bin/awai.cljk dispatch [--apply] # tick, then PERFORM its effects
 
 (ns awai.cli
   (:require [clojure.edn :as edn]

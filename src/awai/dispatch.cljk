@@ -7,7 +7,7 @@
   projected as `:starved` — correctly, because nothing was executing.
 
   Pure, like the rest of `src/`. Every function here returns argv vectors and
-  records; `bin/awai.cljs` runs the processes and writes the files. That split
+  records; `bin/awai.cljk` runs the processes and writes the files. That split
   is what makes a dispatch decision reviewable without a tamaki installed.
 
   ## Why tamaki rather than a runner of our own
@@ -55,7 +55,7 @@
 (def default-config
   "Shape only. The machine's location is not in `fleet.edn` on purpose: a
   checkout path is not fleet policy, and committing one makes the file wrong
-  on every other machine. `bin/awai.cljs` resolves `:workspace` from the
+  on every other machine. `bin/awai.cljk` resolves `:workspace` from the
   environment and merges it over this."
   {:tamaki "orgs/etzhayyim/tamaki/bin/tamaki"
    :project-root "orgs"
@@ -174,7 +174,7 @@
 
 (defn submit-argv
   "`tamaki submit` for one spawn effect, or nil with a reason if it cannot be
-  built. Returns data so `bin/awai.cljs` performs a decision it did not make."
+  built. Returns data so `bin/awai.cljk` performs a decision it did not make."
   [cfg {:keys [role/id role/business runners] :as effect} project n]
   (let [path (project-path cfg project)
         ;; Fleet runners are the admitted, live-qualified execution substrate.

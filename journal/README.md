@@ -80,7 +80,7 @@ must fix.
 
 ## It feeds the loop back
 
-`last-dispatch` in `bin/awai.cljs` folds this file to find when each role
+`last-dispatch` in `bin/awai.cljk` folds this file to find when each role
 last ran, which is what makes `fleet.edn`'s `:tie-break :oldest-dispatch`
 real. Without it every role scores equal on a cold start, the tie-break key
 is uniformly zero, and ordering falls through to alphabetical — measured:

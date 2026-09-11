@@ -11,7 +11,7 @@
 
   Pure. `now-ms` and observations arrive from the caller and `act` returns a
   plan rather than performing it, so the deciding half is testable without a
-  fleet and the performing half is a script (`bin/awai.cljs`).
+  fleet and the performing half is a script (`bin/awai.cljk`).
 
   ## Why a global slot budget rather than per-business
 

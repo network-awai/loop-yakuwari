@@ -2,7 +2,7 @@
   "The awai role registry: businesses, their roles, and the fleet bound above
   both.
 
-  Pure and portable. Reading files is the caller's job (`bin/awai.cljs`), so
+  Pure and portable. Reading files is the caller's job (`bin/awai.cljk`), so
   this namespace can run in a Worker, a JVM job and an nbb script without
   three copies drifting apart.
 

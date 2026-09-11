@@ -12,7 +12,7 @@
       `:business/roles-absent` with a reason. An actor nobody projected and
       nobody declined is an actor that fell out.
 
-  The Tamaki checkout is found the way `bin/awai.cljs` finds the workspace:
+  The Tamaki checkout is found the way `bin/awai.cljk` finds the workspace:
   `AWAI_WORKSPACE`, else the nearest ancestor holding `manifest/west.yml`.
   Not finding it is a FAILURE, not a skip -- a parity check that cannot see
   one side and reports green is the silence CLAUDE.md's six questions are
