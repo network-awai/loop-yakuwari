@@ -4,8 +4,8 @@
 ;; nbb, not bash — CLAUDE.md prohibits new .sh files (owner directive
 ;; 2026-07-14) and ADR-2607173000 retires `bb` as a script host.
 ;;
-;;   nbb deploy/install.cljs            # what it would do
-;;   nbb deploy/install.cljs --apply    # write plists and bootstrap them
+;;   nbb deploy/install.cljk            # what it would do
+;;   nbb deploy/install.cljk --apply    # write plists and bootstrap them
 ;;
 ;; Idempotent: re-running replaces the plists and kickstarts the agents.
 ;;
@@ -26,12 +26,12 @@
 (def apply? (boolean (some #{"--apply"} *command-line-args*)))
 
 (def repo (path/resolve (path/join (path/dirname (or (first *command-line-args*)
-                                                     "deploy/install.cljs"))
+                                                     "deploy/install.cljk"))
                                    "..")))
 
 (def repo-root
   "Resolved by finding fleet.edn rather than trusting cwd, for the same reason
-  bin/awai.cljs does: a wrong root silently yields an empty registry, which
+  bin/awai.cljk does: a wrong root silently yields an empty registry, which
   looks like success."
   (loop [d (path/resolve (.cwd js/process)) n 0]
     (cond

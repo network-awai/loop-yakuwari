@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "test": "nbb --classpath src:test:../../kotoba-lang/yakuwari/src test/run_tests.cljs",
-    "check": "nbb bin/awai.cljs check"
+    "test": "nbb --classpath src:test:../../kotoba-lang/yakuwari/src test/run_tests.cljk",
+    "check": "nbb bin/awai.cljk check"
   }
 }

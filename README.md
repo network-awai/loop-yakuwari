@@ -8,10 +8,10 @@ fleet.edn                 global WIP, runner pool, weights, capability ceiling
 businesses.edn            every business, its role set, and what it LACKS
 workforce.edn             shared job/cadence/capability templates
 yakuwari/<business>.edn   authored business-specific roles (templates fill declared gaps)
-src/awai/registry.cljc    cross-file agreement + the fleet ceiling
-src/awai/loop.cljc        observe -> evaluate -> decide -> act -> record-evidence
-src/awai/dispatch.cljc    effects -> tamaki invocations (the acting half)
-bin/awai.cljs             the CLI (nbb; all I/O lives here)
+src/awai/registry.cljk    cross-file agreement + the fleet ceiling
+src/awai/loop.cljk        observe -> evaluate -> decide -> act -> record-evidence
+src/awai/dispatch.cljk    effects -> tamaki invocations (the acting half)
+bin/awai.cljk             the CLI (nbb; all I/O lives here)
 journal/                  append-only evidence; current window in git
 deploy/                   LaunchAgent residency on murakumo
 ```
@@ -89,7 +89,7 @@ in whichever personal tenant provisions them.
 
 Declined, with reasons in `businesses.edn`: `family-representative` (runner is
 `:deterministic`) and `storage-curator` (deletes). The objective is copied
-**verbatim** from the ActorSpec, and `test/awai/etzhayyim_parity_test.cljc`
+**verbatim** from the ActorSpec, and `test/awai/etzhayyim_parity_test.cljk`
 fails when a copy drifts without a `:tamaki/objective-differs` reason, when an
 actor is neither projected nor declined, or when the Tamaki checkout cannot be
 found at all (not found is a failure, not a skip). All six run under the
@@ -137,19 +137,19 @@ assuming it is load-bearing.
 ## Use
 
 ```sh
-nbb bin/awai.cljs check        # cross-file agreement; exit 1 on drift
-nbb bin/awai.cljs roles        # every role, one line
-nbb bin/awai.cljs ceiling      # where fleet.edn narrows a role
-nbb bin/awai.cljs identities   # the person-* repos the registry expects
-nbb bin/awai.cljs project      # the display model, as EDN
-nbb bin/awai.cljs workforce    # complete Cloud Itonami Bot catalog, one EDN form
-nbb bin/awai.cljs tick         # one cycle, dry-run
-nbb bin/awai.cljs tick --apply # ... and record it
+nbb bin/awai.cljk check        # cross-file agreement; exit 1 on drift
+nbb bin/awai.cljk roles        # every role, one line
+nbb bin/awai.cljk ceiling      # where fleet.edn narrows a role
+nbb bin/awai.cljk identities   # the person-* repos the registry expects
+nbb bin/awai.cljk project      # the display model, as EDN
+nbb bin/awai.cljk workforce    # complete Cloud Itonami Bot catalog, one EDN form
+nbb bin/awai.cljk tick         # one cycle, dry-run
+nbb bin/awai.cljk tick --apply # ... and record it
 
-nbb bin/awai.cljs runs             # what currently occupies a slot
-nbb bin/awai.cljs sync [--apply]   # refresh statuses; release finished trees
-nbb bin/awai.cljs dispatch         # a cycle, showing the tamaki argv it would run
-nbb bin/awai.cljs dispatch --apply # ... and actually submit and start them
+nbb bin/awai.cljk runs             # what currently occupies a slot
+nbb bin/awai.cljk sync [--apply]   # refresh statuses; release finished trees
+nbb bin/awai.cljk dispatch         # a cycle, showing the tamaki argv it would run
+nbb bin/awai.cljk dispatch --apply # ... and actually submit and start them
 ```
 
 `dispatch` needs two machine-local paths that are deliberately not in
@@ -164,7 +164,7 @@ export AWAI_WORKTREE_ROOT=/var/tmp/awai-runs     # per-run trees, OUTSIDE the su
 Current state:
 
 ```
-$ nbb bin/awai.cljs check
+$ nbb bin/awai.cljk check
 businesses 14 | roles 98 | outward 21 | narrowed by ceiling 4
 check: OK
 ```
@@ -220,7 +220,7 @@ full, because a count would not say which file to fix.
 
 ## Residency
 
-`deploy/install.cljs` installs two LaunchAgents: `tick` every 300 s and
+`deploy/install.cljk` installs two LaunchAgents: `tick` every 300 s and
 `project` every 900 s. The installer records the workspace, an external
 `~/.cloud-itonami/awai-worktrees` root, and the qualified Codex binary in the
 resident environment. The tick runs on murakumo's own node, the same shape
@@ -237,8 +237,8 @@ The LaunchAgent then reads business repos and Tamaki from that workspace while
 keeping this loop's mutable journals outside the shared checkout.
 
 ```sh
-nbb deploy/install.cljs            # dry run
-nbb deploy/install.cljs --apply    # write plists and bootstrap
+nbb deploy/install.cljk            # dry run
+nbb deploy/install.cljk --apply    # write plists and bootstrap
 ```
 
 The installer refuses if `../../kotoba-lang/{yakuwari,yakuwari-view}` are not
@@ -252,7 +252,7 @@ npm test    # nbb; needs sibling kotoba-lang/yakuwari and the superproject (or A
 ```
 
 56 tests, 181 assertions (measured 2026-08-23). The entry point is
-`test/run_tests.cljs`; until 2026-08-23 `npm test` read the return value of
+`test/run_tests.cljk`; until 2026-08-23 `npm test` read the return value of
 `clojure.test/run-tests`, which on nbb is nil, so it exited 0 on every failure.
 The runner now takes the summary from `report` and exits 1 on a failure, 2 when
 no test ran at all.

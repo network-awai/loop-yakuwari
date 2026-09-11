@@ -3,7 +3,7 @@
 ;; Each role here IS a Tamaki ActorSpec (`orgs/etzhayyim/tamaki/actors/*.edn`),
 ;; said in this registry's spelling so that Cloud Itonami can provision it as
 ;; a resident workforce Bot in the etzhayyim organization. `:tamaki/actor`
-;; names the ActorSpec it mirrors and `test/awai/etzhayyim_parity_test.cljc`
+;; names the ActorSpec it mirrors and `test/awai/etzhayyim_parity_test.cljk`
 ;; holds the two in agreement: a role whose objective drifts from its actor
 ;; without saying why is a failure, not a silence.
 ;;
