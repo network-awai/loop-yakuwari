@@ -112,7 +112,7 @@
   :yakuwari/project "network-awai/net-oppai-gen"
   :bot/role :trust-safety
   :bot/name "Trust & Safety"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 85
   :yakuwari/objective
   "Measure the boundary, every round, against the live surface and the
    tests — never against the README. Probe https://oppai.fans/api/generation

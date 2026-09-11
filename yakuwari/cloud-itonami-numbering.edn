@@ -11,7 +11,7 @@
   :yakuwari/runners [{:runner :codex :weight 1}]
   :bot/role :compliance
   :bot/name "Regulatory Guard"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 85
   :yakuwari/capabilities
   [{:capability :vf.read :decision :autonomous}
    {:capability :metrics.read :decision :autonomous}
