@@ -1,0 +1,139 @@
+;; oppai-fans — the R18 generation studio on the murakumo fleet (oppai.fans).
+;;
+;; BOUNDARY NOTE, load-bearing. The product's boundary is written in code and
+;; tests, not in tone: `oppai.gen.guard` refuses prompts that name a minor,
+;; appends a minor-exclusion negative to every image job, and lets a face
+;; reach the fleet ONLY through the camera ceremony (server nonce, gesture,
+;; two frames, explicit consent, HttpOnly cookie → KV, 7 days). There is no
+;; photo upload and arbitrary-face swap is a decision NOT taken (root
+;; ADR-2609111130). No role here may weaken that: engineer proposes patches
+;; and the guard tests must stay green; marketer never sells "any face";
+;; supporter escalates the first hint of a third party's likeness;
+;; trust-safety measures the boundary and may only propose tightening.
+;;
+;; Roles not authored here (product-manager, qa, designer, financial-chief)
+;; expand from workforce.edn templates with this business's name and focus.
+
+[{:yakuwari/id :oppai-fans/director
+  :yakuwari/business :oppai-fans
+  :yakuwari/project "network-awai/net-oppai-gen"
+  :yakuwari/objective
+  "Decide what oppai.fans does next — and what it will not do. The next
+   planes are declared (identity: SIWE then Passkey; a public gallery on
+   kotobase; x402/USDC credits) and each of them binds the face enrolment to
+   an identity, never the reverse. The first priority today is measured, not
+   chosen: renders on gad take 1 min warm and 12–15 min under APU memory
+   contention (three ComfyUI instances resident), and a studio that makes a
+   visitor wait a quarter hour has no funnel to optimise."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
+   {:capability :roadmap.set :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :spend.commit :decision :approval-required}
+   {:capability :governor.policy.change :decision :approval-required
+    :note "The guard (minor terms, minor-negative, camera-only face path) is the containment boundary. It may be tightened by proposal; it is never loosened here."}]}
+
+ {:yakuwari/id :oppai-fans/engineer
+  :yakuwari/business :oppai-fans
+  :yakuwari/project "network-awai/net-oppai-gen"
+  :yakuwari/objective
+  "Keep the studio honest end to end: `npm test` (nbb, 64 tests) and
+   `npm run e2e` against wrangler dev and against https://oppai.fans, the
+   image-model list asked of the generation node rather than the fleet map,
+   and the job path (submit → poll → artifact) that carries the face. The
+   standing gaps are on the fleet side: image jobs take no resource class on
+   gad so a render competes with resident video models (12 min measured),
+   and the faceid mode has been advertised but not rendered live. A change
+   that makes a guard test go red is not a change to land."
+  :yakuwari/scale {:min 0 :desired 1 :max 2
+                   :scale-up-on {:queue-depth 2 :blocker-count 1}
+                   :scale-down-after-ms 300000}
+  :yakuwari/runners [{:runner :claude :weight 2} {:runner :codex :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.triage :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :patch.create :decision :autonomous}
+   {:capability :patch.integrate :decision :approval-required}
+   {:capability :deploy.production :decision :approval-required
+    :note "oppai.fans is one Worker; a deploy is `wrangler deploy` from a checkout containing origin/main. Approval, because the last deploy wins and there is no fast-forward check."}
+   {:capability :governor.policy.change :decision :blocked
+    :note "An engineer that can edit guard.cljk's minor list or the face path while fixing the pipeline it contains has no containment policy. Propose through the director or trust-safety."}]}
+
+ {:yakuwari/id :oppai-fans/marketer
+  :yakuwari/business :oppai-fans
+  :yakuwari/project "network-awai/net-oppai-gen"
+  :yakuwari/objective
+  "Make an adult product findable by adults without ever implying it does
+   what it refuses to do: no 'swap any face', no minors, no real-person
+   likeness. Claims point at the live catalog (#models) and at measured
+   render times, not at aspiration. The site is noindex by design; the
+   channels are the adult-content venues that accept it, and each one is
+   named before it is used."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
+   {:capability :content.draft :decision :autonomous}
+   {:capability :content.publish :decision :approval-required
+    :note "Stricter than the fleet's :voice-required on purpose: adult-product copy is exactly where an unreviewed claim does legal harm."}
+   {:capability :spend.commit :decision :approval-required}]}
+
+ {:yakuwari/id :oppai-fans/supporter
+  :yakuwari/business :oppai-fans
+  :yakuwari/project "network-awai/net-oppai-gen"
+  :yakuwari/objective
+  "Answer the people using it, and escalate three things the moment they
+   appear: any sign a third party's face was enrolled, any output that
+   suggests a minor, and any request to erase an enrolment or a work. An
+   erasure request IS the authorisation — the face frame is the most
+   personal byte this product holds and it must be gone on request, not on
+   review. Recurring questions become documentation or issues."
+  :yakuwari/scale {:min 0 :desired 1 :max 2 :scale-up-on {:queue-depth 3}}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :incident.respond :decision :autonomous}
+   {:capability :customer.contact :decision :approval-required}
+   {:capability :subject.erase :decision :autonomous
+    :note "Face enrolments (KV, 7-day TTL) and works are the subjects. Deletion on request needs no second opinion."}]}
+
+ ;; trust-safety — custom kind (workforce.edn has no template; authored like
+ ;; club-shinshi's producer). On this product the boundary is the product
+ ;; decision, and no template role is charged with measuring it.
+ {:yakuwari/id :oppai-fans/trust-safety
+  :yakuwari/business :oppai-fans
+  :yakuwari/project "network-awai/net-oppai-gen"
+  :bot/role :trust-safety
+  :bot/name "Trust & Safety"
+  :bot/cadence-minutes 15
+  :yakuwari/objective
+  "Measure the boundary, every round, against the live surface and the
+   tests — never against the README. Probe https://oppai.fans/api/generation
+   with a prompt naming a minor (expect 400 'prompt names a minor'), with
+   `input.face` from a browser (expect 400 'not accepted'), and with
+   `input.face_ref` and no enrolment (expect 400 'no enrolled face'); confirm
+   `oppai.gen.guard-test` is green at the deployed commit; confirm the face
+   view offers no file input. Report each probe with its status code and
+   body — a probe that could not run is not a pass. Propose tightening
+   (a missing term, a new minor-indicating phrase, a takedown path) as
+   issues; never propose loosening, and never edit guard.cljk directly."
+  :yakuwari/scale {:min 0 :desired 1 :max 1}
+  :yakuwari/runners [{:runner :claude :weight 1}]
+  :yakuwari/capabilities
+  [{:capability :vf.read :decision :autonomous}
+   {:capability :metrics.read :decision :autonomous}
+   {:capability :test.run :decision :autonomous}
+   {:capability :issue.create :decision :autonomous}
+   {:capability :release.block :decision :autonomous
+    :note "A red guard test or a probe that returned 200 where a 400 was expected blocks promotion without asking."}
+   {:capability :patch.create :decision :approval-required
+    :note "Even a tightening patch goes through review: the guard's tests pin each refusal to its own sentence, and a new term must come with its test."}
+   {:capability :governor.policy.change :decision :blocked}]}
+]
