@@ -3,10 +3,23 @@
 ;; shared job policy has one reviewable source while every objective still
 ;; names its business and product-specific focus.
 
-;; CADENCE IS A CEILING, NOT A PROMISE (owner directive 2026-08-29: every role
-;; to 15 minutes).
+;; CADENCE IS DERIVED, NOT CHOSEN (2026-09-11, capacity plan: kotoba-lang/murakumo
+;; resources/murakumo/capacity-plan.edn, computed by murakumo.infer.capacity).
+;; The resident runs max-active 2 at p50 174 s = 993 runs/day, 695 at 70%
+;; utilisation. 156 Bots at 15 min asked 14,976 — 21x. The planner keeps the
+;; priority order (probe 15 / ops 60 / strategy 360 base) and scales every
+;; cadence by one factor k = requested/capacity = 5.7, rounded up to 5 min:
+;;   probe    (supporter, trust-safety, kaizen-analyst, regulatory-guard)   85
+;;   ops      (engineer, qa, product-manager, operations, ad-*)            340
+;;   strategy (director, designer, sales, marketer, financial-chief, ...) 2035
+;; so the requested runs/day (551 across the projection) fit what the hardware
+;; measured. Re-run the planner when max-active or run duration changes; do not
+;; edit these numbers by hand. The 2026-08-29 directive ("every role to 15
+;; minutes") is superseded by that measurement: 15 asked for 21x the capacity
+;; and the scheduler, not the number, decided the real interval (~3 h) while
+;; 117 Bots sat overdue.
 ;;
-;; What was measured that day, after the Ornith edge route was repaired:
+;; The paragraphs below are the measurement the 08-29 directive was made against:
 ;; resident runs took p50 174s (min 55s, p90/max 3721s), and the app runs
 ;; `[:bots :workforce :max-active] 2`. Two slots at 174s is about 993 runs a
 ;; day. 126 Bots asking every 15 minutes is 12,096 -- roughly twelve times the
