@@ -1,7 +1,7 @@
 {:paths ["src" "test" "bin"]
  ;; `text` is here because `src/awai/*.cljc` and `bin/awai.cljk` require
  ;; `kotoba.lang.text` (the workspace-wide clojure.string retirement,
- ;; e3f6024 / 665da5b, 2026-09-08). Without it `nbb bin/awai.cljk check`
+ ;; e3f6024 / 665da5b, 2026-09-08). Without it `kbb --backend sci bin/awai.cljk check`
  ;; ends at "Could not find namespace: kotoba.lang.text" -- the gate this
  ;; repo ships could not run at all, which is not the same as passing.
  :deps {io.github.kotoba-lang/yakuwari      {:local/root "../../kotoba-lang/yakuwari"}

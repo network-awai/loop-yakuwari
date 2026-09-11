@@ -141,23 +141,23 @@ Sources are `.cljk` (2026-09-11 rename). nbb does not yet resolve `.cljk`
 namespaces, so `bin/awai.cljs.cljk` is a **loader**: it routes the classpath through
 the superproject's `scripts/cljk-classpath.cljs` and execs `bin/awai.cljk`
 with your arguments. It is also the file cloud-itonami-app's provisioner runs,
-which is why it kept its name. `nbb bin/awai.cljs.cljk check` therefore works;
-`nbb bin/awai.cljk check` does not, until nbb learns the extension.
+which is why it kept its name. `kbb --backend sci bin/awai.cljs.cljk check` therefore works;
+`kbb --backend sci bin/awai.cljk check` does not, until nbb learns the extension.
 
 ```sh
-nbb bin/awai.cljk check        # cross-file agreement; exit 1 on drift
-nbb bin/awai.cljk roles        # every role, one line
-nbb bin/awai.cljk ceiling      # where fleet.edn narrows a role
-nbb bin/awai.cljk identities   # the person-* repos the registry expects
-nbb bin/awai.cljk project      # the display model, as EDN
-nbb bin/awai.cljk workforce    # complete Cloud Itonami Bot catalog, one EDN form
-nbb bin/awai.cljk tick         # one cycle, dry-run
-nbb bin/awai.cljk tick --apply # ... and record it
+kbb --backend sci bin/awai.cljk check        # cross-file agreement; exit 1 on drift
+kbb --backend sci bin/awai.cljk roles        # every role, one line
+kbb --backend sci bin/awai.cljk ceiling      # where fleet.edn narrows a role
+kbb --backend sci bin/awai.cljk identities   # the person-* repos the registry expects
+kbb --backend sci bin/awai.cljk project      # the display model, as EDN
+kbb --backend sci bin/awai.cljk workforce    # complete Cloud Itonami Bot catalog, one EDN form
+kbb --backend sci bin/awai.cljk tick         # one cycle, dry-run
+kbb --backend sci bin/awai.cljk tick --apply # ... and record it
 
-nbb bin/awai.cljk runs             # what currently occupies a slot
-nbb bin/awai.cljk sync [--apply]   # refresh statuses; release finished trees
-nbb bin/awai.cljk dispatch         # a cycle, showing the tamaki argv it would run
-nbb bin/awai.cljk dispatch --apply # ... and actually submit and start them
+kbb --backend sci bin/awai.cljk runs             # what currently occupies a slot
+kbb --backend sci bin/awai.cljk sync [--apply]   # refresh statuses; release finished trees
+kbb --backend sci bin/awai.cljk dispatch         # a cycle, showing the tamaki argv it would run
+kbb --backend sci bin/awai.cljk dispatch --apply # ... and actually submit and start them
 ```
 
 `dispatch` needs two machine-local paths that are deliberately not in
@@ -172,7 +172,7 @@ export AWAI_WORKTREE_ROOT=/var/tmp/awai-runs     # per-run trees, OUTSIDE the su
 Current state:
 
 ```
-$ nbb bin/awai.cljk check
+$ kbb --backend sci bin/awai.cljk check
 businesses 14 | roles 98 | outward 21 | narrowed by ceiling 4
 check: OK
 ```
@@ -245,8 +245,8 @@ The LaunchAgent then reads business repos and Tamaki from that workspace while
 keeping this loop's mutable journals outside the shared checkout.
 
 ```sh
-nbb deploy/install.cljk            # dry run
-nbb deploy/install.cljk --apply    # write plists and bootstrap
+kbb --backend sci deploy/install.cljk            # dry run
+kbb --backend sci deploy/install.cljk --apply    # write plists and bootstrap
 ```
 
 The installer refuses if `../../kotoba-lang/{yakuwari,yakuwari-view}` are not

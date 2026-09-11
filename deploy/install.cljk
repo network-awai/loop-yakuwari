@@ -1,11 +1,11 @@
-#!/usr/bin/env nbb
+#!/usr/bin/env kbb
 ;; Install the residency LaunchAgents.
 ;;
 ;; nbb, not bash — CLAUDE.md prohibits new .sh files (owner directive
 ;; 2026-07-14) and ADR-2607173000 retires `bb` as a script host.
 ;;
-;;   nbb deploy/install.cljk            # what it would do
-;;   nbb deploy/install.cljk --apply    # write plists and bootstrap them
+;;   kbb --backend sci deploy/install.cljk            # what it would do
+;;   kbb --backend sci deploy/install.cljk --apply    # write plists and bootstrap them
 ;;
 ;; Idempotent: re-running replaces the plists and kickstarts the agents.
 ;;
