@@ -51,6 +51,7 @@ Two kinds, and they decompose differently.
 | `nexus-x402` | 8 | designer — comes from `x402-directory` |
 | `cloud-itonami` | 9 | — |
 | `cloud-murakumo` | 9 | — |
+| `oppai-fans` | 9 | sales — consumer self-serve behind an age gate; kaizen-analyst — no 回遊 read face yet. Adds a custom `trust-safety` kind: on an R18 product the boundary is the product decision (2026-09-11, root ADR-2609111130) |
 
 ### The five creative -ka — decomposed by WORK
 

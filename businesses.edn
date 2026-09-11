@@ -28,7 +28,8 @@
   :git-maintainer "keeps git bookkeeping across the west workspace from accumulating: reports interrupted merges and stashes for the human runbook, and prunes only the registrations of working trees that are already gone"
   :domain-steward "operates the agent-first domain portfolio: discovers and prices names, monitors registrations and DNS, prepares exact proposals, and commits only proposals already approved by Passkey"
   :kaizen-analyst "reads what the site's own 回遊 measurement says and turns the single most answerable question into a proposal — never a remedy, because the measurement holds no visitor identity and cannot say why"
-  :corpus-analyst "reads one knowledge corpus' own registry, ontology and coverage notes and states the single next bounded step with the evidence that is missing — never an ingest, because admitting bytes needs a fetched, digest-checked pin this role cannot produce"}
+  :corpus-analyst "reads one knowledge corpus' own registry, ontology and coverage notes and states the single next bounded step with the evidence that is missing — never an ingest, because admitting bytes needs a fetched, digest-checked pin this role cannot produce"
+  :trust-safety "keeps an adult-content product inside its stated boundary — age gate, no minors, no non-consensual likeness, takedown and erasure — by measuring the live surface and the guard tests, and proposes tightening; never loosening, and never a policy change on its own"}
 
  ;; sales and supporter and director correspond OUTWARD — they hold a
  ;; mailbox and a did:web (owner decision 2026-07-30). engineer, designer and
@@ -66,6 +67,26 @@
    :business/roles-absent
    [{:role :sales
      :why "Consumer self-serve. Nobody is negotiated with, so there is nothing for a sales role to do that marketer and supporter do not already cover."}]}
+
+  ;; oppai-fans — 2026-09-11 (root ADR-2609111130). The R18 generation studio
+  ;; on the murakumo fleet: model catalog, image/video jobs, a works shelf, and
+  ;; a consent-gated face reference (the person's own face, from their own
+  ;; camera, under a server challenge — never an uploaded photo). Decomposed by
+  ;; ROLE like the other startups, plus one custom kind: trust-safety, because
+  ;; on this product the boundary IS the product decision and no template
+  ;; role is charged with measuring it.
+  {:business/id :oppai-fans
+   :business/name "oppai.fans"
+   :business/repo "network-awai/net-oppai-gen"
+   :business/domain "oppai.fans"
+   :business/what "R18 image and video generation on the murakumo fleet (generation.murakumo.cloud → gad ComfyUI): a civitai/tensorhub-shaped model catalog, presets, a per-device works shelf, i2v hand-off, and a consent-gated face reference — the visitor's own face, captured from their camera under a single-use server challenge; no photo upload path exists. Adults only; prompts naming a minor are refused server-side and every job carries a minor-exclusion negative."
+   :business/roles [:director :product-manager :engineer :qa :designer :marketer :supporter :financial-chief :trust-safety]
+   :business/roles-absent
+   [{:role :sales
+     :why "Consumer self-serve behind an age gate. Nobody is negotiated with; marketer and supporter cover the funnel. Add sales only if a studio/API tier is sold by contract."}
+    {:role :kaizen-analyst
+     :why "oppai.fans has no 回遊 read face yet (no kaiyu measurement is wired), and a role with no measurement to read would invent its findings. Add it the day the read face lands."}]
+   :business/note "No human login exists yet (human-auth inventory: :migration-gap); identity (SIWE first, then Passkey), a public gallery on kotobase and x402/USDC credits are the declared next planes. The face-reference ceremony is a consent boundary bound to a browser, not identity verification — every role here must read it as such. Payment rails that refuse adult content (card processors) are not candidates."}
 
   {:business/id :net-kotobase
    :business/name "net kotobase"
