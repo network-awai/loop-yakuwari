@@ -3,10 +3,10 @@
 ;; The CLI is bin/awai.cljk and the sources are src/awai/*.cljk
 ;; (adr-2609111500-cljk-rename-all-clojure-source, 2026-09-11). nbb 1.4.208
 ;; runs a .cljk entry but resolves namespaces only from .cljs/.cljc/.clj, so
-;; `nbb bin/awai.cljk check` dies on `Could not find namespace: awai.registry`.
+;; `kbb --backend sci bin/awai.cljk check` dies on `Could not find namespace: awai.registry`.
 ;; cloud-itonami-app's provisioner (workforce.clj) runs exactly
 ;;
-;;   nbb --config /dev/null --classpath <src:siblings> bin/awai.cljs.cljk workforce
+;;   kbb --backend sci --config /dev/null --classpath <src:siblings> bin/awai.cljs.cljk workforce
 ;;
 ;; and reads the EDN it prints — so from 2026-09-11 10:37 (the rename merge)
 ;; every `workforce_provision` answered "registry is not checked out", and
@@ -22,7 +22,7 @@
 ;; 2) when the loader cannot be found rather than running the .cljk tree bare
 ;; and failing somewhere less legible.
 ;;
-;; Removal condition: the day `nbb --classpath src bin/awai.cljk check`
+;; Removal condition: the day `kbb --backend sci --classpath src bin/awai.cljk check`
 ;; resolves awai.registry on its own, delete this file and point the
 ;; provisioner at bin/awai.cljk.
 (ns awai-loader
