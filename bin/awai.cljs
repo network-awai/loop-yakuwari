@@ -34,7 +34,12 @@
 (def here (path/dirname (path/resolve *file*)))
 (def repo (path/resolve here ".."))
 (def workspace (path/resolve repo ".." ".." ".."))
-(def loader (path/join workspace "scripts" "cljk-classpath.cljs"))
+(def loader
+  ;; The superproject renamed its own scripts to .cljk minutes after this
+  ;; loader first shipped; accept either name.
+  (first (filter fs/existsSync
+                 [(path/join workspace "scripts" "cljk-classpath.cljk")
+                  (path/join workspace "scripts" "cljk-classpath.cljs")])))
 
 (defn- sibling-roots []
   (let [f (path/join repo "nbb.edn")]
@@ -48,8 +53,8 @@
   (let [h "/opt/homebrew/bin/nbb"] (if (fs/existsSync h) h "nbb")))
 
 (defn -main []
-  (when-not (fs/existsSync loader)
-    (println (str "REFUSED: cljk loader not found at " loader
+  (when-not loader
+    (println (str "REFUSED: cljk loader not found under " (path/join workspace "scripts")
                   " — bin/awai.cljk cannot be resolved without it"))
     (js/process.exit 2))
   (let [raw (clojure.string/join ":" (concat [(path/join repo "src") (path/join repo "test") (path/join repo "bin")]

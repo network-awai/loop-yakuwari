@@ -40,7 +40,7 @@
   :yakuwari/project "network-awai/cloud-murakumo"
   :bot/role :ad-placement
   :bot/name "広告出稿 · Advertiser desk"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 340
   :yakuwari/objective
   "Find and prepare the advertisers who pay for murakumo's free inference tier.
 
@@ -81,7 +81,7 @@
   :yakuwari/project "network-awai/cloud-murakumo"
   :bot/role :ad-serving
   :bot/name "広告配信 · Delivery"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 340
   :yakuwari/objective
   "Keep what is served correct and billable.
 
@@ -121,7 +121,7 @@
   :yakuwari/project "network-awai/cloud-murakumo"
   :bot/role :ad-audience
   :bot/name "広告閲覧 · Audience integrity"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 340
   :yakuwari/objective
   "Make sure every free request was paid for by a view that really happened.
 

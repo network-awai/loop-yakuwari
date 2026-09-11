@@ -66,7 +66,7 @@
   :yakuwari/runners [{:runner :codex :weight 1}]
   :bot/role :operations
   :bot/name "Disk Maintainer"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 340
   :yakuwari/capabilities
   [{:capability :vf.read :decision :autonomous}
    {:capability :disk.inspect :decision :autonomous}
@@ -91,7 +91,7 @@
   :yakuwari/runners [{:runner :codex :weight 1}]
   :bot/role :operations
   :bot/name "Domain Steward"
-  :bot/cadence-minutes 15
+  :bot/cadence-minutes 340
   :yakuwari/capabilities
   [{:capability :vf.read :decision :autonomous}
    {:capability :domain.read :decision :autonomous}
@@ -130,7 +130,7 @@
   :yakuwari/runners [{:runner :claude :weight 1}]
   :bot/role :operations
   :bot/name "Git Maintainer"
-  :bot/cadence-minutes 60
+  :bot/cadence-minutes 340
   :yakuwari/capabilities
   [{:capability :vf.read :decision :autonomous}
    {:capability :git.inspect :decision :autonomous}

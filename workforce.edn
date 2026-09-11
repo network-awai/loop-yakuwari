@@ -23,7 +23,7 @@
 {:awai.workforce/version 1
  :awai.workforce/templates
  {:director
-  {:bot/role :business-owner :bot/name "Business Owner" :bot/cadence-minutes 15
+  {:bot/role :business-owner :bot/name "Business Owner" :bot/cadence-minutes 2035
    :yakuwari/objective "Choose the next bounded outcome and reconcile product, customer, operational and financial evidence."
    :yakuwari/scale {:min 0 :desired 1 :max 1}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -36,7 +36,7 @@
     {:capability :spend.commit :decision :approval-required}]}
 
   :product-manager
-  {:bot/role :product-manager :bot/name "Product Manager" :bot/cadence-minutes 15
+  {:bot/role :product-manager :bot/name "Product Manager" :bot/cadence-minutes 340
    :yakuwari/objective "Turn observed user and operator needs into one testable increment with acceptance evidence and named non-goals."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -48,7 +48,7 @@
     {:capability :release.accept :decision :approval-required}]}
 
   :engineer
-  {:bot/role :engineer :bot/name "Engineer" :bot/cadence-minutes 15
+  {:bot/role :engineer :bot/name "Engineer" :bot/cadence-minutes 340
    :yakuwari/objective "Deliver or propose the smallest verified engineering change that removes the highest current technical blocker."
    :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 2 :blocker-count 1}}
    :yakuwari/runners [{:runner :codex :weight 2} {:runner :claude :weight 1}]
@@ -61,7 +61,7 @@
     {:capability :incident.respond :decision :autonomous}]}
 
   :qa
-  {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 15
+  {:bot/role :qa :bot/name "QA" :bot/cadence-minutes 340
    :yakuwari/objective "Try to falsify the release claim with reproducible tests, record the smallest counterexample, and block promotion when evidence is missing."
    :yakuwari/scale {:min 0 :desired 1 :max 2 :scale-up-on {:blocker-count 1}}
    :yakuwari/runners [{:runner :codex :weight 1}]
@@ -74,7 +74,7 @@
     {:capability :deploy.production :decision :blocked}]}
 
   :designer
-  {:bot/role :designer :bot/name "Product Designer" :bot/cadence-minutes 15
+  {:bot/role :designer :bot/name "Product Designer" :bot/cadence-minutes 2035
    :yakuwari/objective "Own the human-facing interaction and make the critical journey understandable, accessible and verifiable."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -85,7 +85,7 @@
     {:capability :patch.integrate :decision :approval-required}]}
 
   :sales
-  {:bot/role :sales :bot/name "Sales" :bot/cadence-minutes 15
+  {:bot/role :sales :bot/name "Sales" :bot/cadence-minutes 2035
    :yakuwari/objective "Move one named, qualified prospect toward a truthful buying decision; never create an open-ended outbound audience."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -98,7 +98,7 @@
     {:capability :pricing.change :decision :blocked}]}
 
   :marketer
-  {:bot/role :marketer :bot/name "Marketer" :bot/cadence-minutes 15
+  {:bot/role :marketer :bot/name "Marketer" :bot/cadence-minutes 2035
    :yakuwari/objective "Make the product findable and legible using claims that point to current product or measured evidence."
    :yakuwari/scale {:min 0 :desired 1 :max 2}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -109,7 +109,7 @@
     {:capability :spend.commit :decision :approval-required}]}
 
   :supporter
-  {:bot/role :supporter :bot/name "Customer Support" :bot/cadence-minutes 15
+  {:bot/role :supporter :bot/name "Customer Support" :bot/cadence-minutes 85
    :yakuwari/objective "Answer current users, turn recurring questions into fixes or documentation, and escalate product-impacting failures."
    :yakuwari/scale {:min 0 :desired 1 :max 3 :scale-up-on {:queue-depth 3 :blocker-count 1}}
    :yakuwari/runners [{:runner :claude :weight 1}]
@@ -122,7 +122,7 @@
     {:capability :subject.erase :decision :autonomous}]}
 
   :financial-chief
-  {:bot/role :financial-chief :bot/name "Financial Chief" :bot/cadence-minutes 15
+  {:bot/role :financial-chief :bot/name "Financial Chief" :bot/cadence-minutes 2035
    :yakuwari/objective "Keep revenue, cost, runway and pricing assumptions explicit, separating measured facts from forecasts and never moving or trading funds."
    :yakuwari/scale {:min 0 :desired 1 :max 1}
    :yakuwari/runners [{:runner :claude :weight 1}]
