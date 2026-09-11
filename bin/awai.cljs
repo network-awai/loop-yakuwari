@@ -1,0 +1,67 @@
+;; bin/awai.cljs — the LOADER for bin/awai.cljk, not a copy of it.
+;;
+;; The CLI is bin/awai.cljk and the sources are src/awai/*.cljk
+;; (adr-2609111500-cljk-rename-all-clojure-source, 2026-09-11). nbb 1.4.208
+;; runs a .cljk entry but resolves namespaces only from .cljs/.cljc/.clj, so
+;; `nbb bin/awai.cljk check` dies on `Could not find namespace: awai.registry`.
+;; cloud-itonami-app's provisioner (workforce.clj) runs exactly
+;;
+;;   nbb --config /dev/null --classpath <src:siblings> bin/awai.cljs workforce
+;;
+;; and reads the EDN it prints — so from 2026-09-11 10:37 (the rename merge)
+;; every `workforce_provision` answered "registry is not checked out", and
+;; registry edits stopped reaching running Bots. Measured the same day when
+;; oppai-fans was added.
+;;
+;; This file keeps that contract by delegating: it rebuilds the classpath the
+;; way the provisioner does (src, test, bin, plus every `:local/root` sibling
+;; nbb.edn declares), routes it through the superproject's loader
+;; `scripts/cljk-classpath.cljs` (a symlink farm OUTSIDE the repo, per the
+;; sibling's cljk-origin.edn), and execs `bin/awai.cljk` with the caller's
+;; arguments and stdio. Nothing inside any repo is written. It refuses (exit
+;; 2) when the loader cannot be found rather than running the .cljk tree bare
+;; and failing somewhere less legible.
+;;
+;; Removal condition: the day `nbb --classpath src bin/awai.cljk check`
+;; resolves awai.registry on its own, delete this file and point the
+;; provisioner at bin/awai.cljk.
+(ns awai-loader
+  (:require ["node:fs" :as fs]
+            ["node:path" :as path]
+            ["node:child_process" :as cp]
+            [cljs.reader :as reader]))
+
+(def here (path/dirname (path/resolve *file*)))
+(def repo (path/resolve here ".."))
+(def workspace (path/resolve repo ".." ".." ".."))
+(def loader (path/join workspace "scripts" "cljk-classpath.cljs"))
+
+(defn- sibling-roots []
+  (let [f (path/join repo "nbb.edn")]
+    (if (fs/existsSync f)
+      (->> (vals (:deps (reader/read-string (fs/readFileSync f "utf8"))))
+           (keep :local/root)
+           (map #(path/join (path/resolve repo %) "src")))
+      [])))
+
+(defn- nbb-bin []
+  (let [h "/opt/homebrew/bin/nbb"] (if (fs/existsSync h) h "nbb")))
+
+(defn -main []
+  (when-not (fs/existsSync loader)
+    (println (str "REFUSED: cljk loader not found at " loader
+                  " — bin/awai.cljk cannot be resolved without it"))
+    (js/process.exit 2))
+  (let [raw (clojure.string/join ":" (concat [(path/join repo "src") (path/join repo "test") (path/join repo "bin")]
+                                             (sibling-roots)))
+        mirrored (cp/execFileSync (nbb-bin) #js [loader raw]
+                                  #js {:encoding "utf8" :stdio #js ["ignore" "pipe" "ignore"]})
+        args (vec *command-line-args*)
+        r (cp/spawnSync (nbb-bin)
+                        (clj->js (concat ["--config" "/dev/null" "--classpath" (.trim mirrored)
+                                          (path/join repo "bin" "awai.cljk")]
+                                         args))
+                        #js {:stdio "inherit" :cwd repo})]
+    (js/process.exit (or (.-status r) 1))))
+
+(-main)
