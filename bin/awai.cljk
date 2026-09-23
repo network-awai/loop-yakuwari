@@ -522,6 +522,27 @@
            :terminal (- (count (:runs m)) (count live))
            :from :tamaki})))))
 
+(defn- release-terminal-runs!
+  "Hand back the worktree (and, for a no-change or failed run, the branch) of
+  every run that reached a terminal status — see remove-worktree!.
+
+  Must run before the runs are dropped from journal/runs.edn: the record is
+  the only thing that says which directory and branch a run owned. Measured
+  2026-09-23: only `sync` did this, while the 300 s LaunchAgent runs
+  `dispatch --apply`, which pruned terminal runs from the journal without
+  releasing anything. The worktrees were left for the 6-hourly farm retire.
+  Their `awai/<role>-<ms>` branches survived that too (its `branch -d`
+  judges against the shared checkout's pinned HEAD, not the remote default),
+  and 3,975 of them piled up across 9 repos, 290 of 298 in nexus-x402 with
+  no commit of their own."
+  [terminal-runs]
+  (doseq [r terminal-runs]
+    (let [result (remove-worktree! r)]
+      (println (str "  RELEASE " (:agent.run/id r) " " (name (:agent.run/status r))
+                    " — " (name (:disposition result))
+                    (when-let [branch (:branch result)]
+                      (str " — proposal branch " branch)))))))
+
 (defn cmd-sync [apply?]
   (let [{:keys [fleet]} (load-registry)
         cfg (dispatch-config fleet)
@@ -545,11 +566,7 @@
                     (Math/round (/ (:queued-ms s) 1000)) "s — submitted but never leased")))
     (cond
       (= :stale from) (die 1)
-      apply? (do (doseq [r terminal-runs]
-                   (let [result (remove-worktree! r)]
-                     (println (str "      " (name (:disposition result))
-                                   (when-let [branch (:branch result)]
-                                     (str " — proposal branch " branch))))))
+      apply? (do (release-terminal-runs! terminal-runs)
                  (write-runs! runs)
                  (println "  written → journal/runs.edn"))
       :else (println "  dry-run: nothing written, no tree released (--apply to record)"))))
@@ -611,7 +628,7 @@
   (let [{:keys [fleet roles]} (load-registry)
         cfg (dispatch-config fleet)
         on-record (runs)
-        {:keys [runs error]} (refresh cfg on-record)
+        {:keys [runs error terminal-runs]} (refresh cfg on-record)
         t (loop'/tick {:fleet fleet :roles roles :runs runs
                        :now-ms (.now js/Date)
                        :last-dispatch (last-dispatch)})
@@ -652,6 +669,9 @@
             cancelled (set (map second (:cancels p)))
             kept (vec (remove #(contains? cancelled (:agent.run/id %)) runs))
             fresh (vec (keep #(perform-submit! cfg %) (:submits p)))]
+        ;; `runs` is already pruned of terminal runs; release theirs before the
+        ;; journal forgets them (release-terminal-runs!).
+        (release-terminal-runs! terminal-runs)
         (write-runs! (into kept fresh))
         (fs/appendFileSync (at "journal" "current.edn")
                            (str (pr-str (assoc (:evidence t)
