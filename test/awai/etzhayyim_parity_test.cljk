@@ -17,7 +17,7 @@
   Not finding it is a FAILURE, not a skip -- a parity check that cannot see
   one side and reports green is the silence CLAUDE.md's six questions are
   about."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [clojure.edn :as edn]
             [kotoba.lang.text :as str]
             #?(:cljs ["fs" :as fs])

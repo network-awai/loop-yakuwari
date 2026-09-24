@@ -11,7 +11,7 @@
 ;; Exit codes: 0 every test passed; 1 a failure or error; 2 no test ran at
 ;; all -- an empty run is not a green run.
 (ns run-tests
-  (:require [clojure.test :as t]
+  (:require [kotoba.test :as t]
             [awai.core-test]
             [awai.etzhayyim-parity-test]))
 
