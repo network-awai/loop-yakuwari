@@ -1,5 +1,5 @@
 (ns awai.core-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [yakuwari.spec :as spec]
             [awai.registry :as registry]
             [awai.loop :as loop']
