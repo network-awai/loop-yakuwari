@@ -26,7 +26,7 @@
 ;; resolves awai.registry on its own, delete this file and point the
 ;; provisioner at bin/awai.cljk.
 (ns awai-loader
-  (:require ["node:fs" :as fs]
+  (:require [kotoba.lang.text] ["node:fs" :as fs]
             ["node:path" :as path]
             ["node:child_process" :as cp]
             [cljs.reader :as reader]))
@@ -57,7 +57,7 @@
     (println (str "REFUSED: cljk loader not found under " (path/join workspace "scripts")
                   " — bin/awai.cljk cannot be resolved without it"))
     (js/process.exit 2))
-  (let [raw (clojure.string/join ":" (concat [(path/join repo "src") (path/join repo "test") (path/join repo "bin")]
+  (let [raw (kotoba.lang.text/join ":" (concat [(path/join repo "src") (path/join repo "test") (path/join repo "bin")]
                                              (sibling-roots)))
         mirrored (cp/execFileSync (nbb-bin) #js [loader raw]
                                   #js {:encoding "utf8" :stdio #js ["ignore" "pipe" "ignore"]})
